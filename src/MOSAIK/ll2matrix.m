@@ -45,23 +45,23 @@ matrices = [];
 % matrices_m2=[];
 for ii=1:length(peaks)         % loop over all frames
     npart = length(peaks{ii}(:,1));
-    for ipart=1:npart,         % loop over all particles
+    for ipart=1:npart         % loop over all particles
 	iframe = ii;
 	next = peaks{iframe}(ipart,6);
-	if (next > 0),         % if particle starts a trajectory,
+	if (next > 0)         % if particle starts a trajectory,
 	                       % follow it
 	    matrix = [iframe,peaks{iframe}(ipart,1), peaks{iframe}(ipart,2),peaks{iframe}(ipart,3),peaks{iframe}(ipart,4)];
 	    peaks{iframe}(ipart,6) = -1;   % mark used
-	    while (next > 0),  % convert to matrix form
+	    while (next > 0)  % convert to matrix form
 		iframe = iframe + 1;
 		matrix = [matrix; iframe, peaks{iframe}(next,1), peaks{iframe}(next,2),peaks{iframe}(next,3),peaks{iframe}(next,4)];
 		nextold = next;
 		next = peaks{iframe}(next,6);    % mark used
 		peaks{iframe}(nextold,6) = -1;
-	    end;
+	    end
 	    matrix = {matrix};
 	    matrices = [matrices, matrix];
-	end;
+	end
     end;
 end;
 

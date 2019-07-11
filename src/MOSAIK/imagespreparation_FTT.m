@@ -21,11 +21,14 @@
 %====================================================================== 
 
 
-function imagesFTT=imagespreparation_FTT(filestub, ext, init, final,viz,LowFreqBand,HighFreqBand)
+function [imagesFTT,images]=imagespreparation_FTT(fname,init,final,viz,LowFreqBand,HighFreqBand)
 
 %=============================================================
 % read images and determine global extrema
 %=============================================================
+info = imfinfo(fname);
+num_images = numel(info);
+
 
 if viz ==1,
     nfig = 1;
@@ -33,33 +36,33 @@ else
     nfig = -1;
 end;
 
-disp('Scanning files for minimum and maximum intensity values...')
+
 maxint = -Inf;
 minint = Inf;
 numsat = 0;
 
 for img=init:final
-    file = sprintf('%s%d%s',filestub,img,ext);
-    orig = double(imread(file));
+    orig = double(imread(fname, img, 'Info', info));
+    % cut bright artificial spot on the left
+    orig(1:40,1:40)=0;
+    
     locmax = max(max(orig));
     locmin = min(min(orig));
-    if locmax > 254, numsat = numsat+1; end;
+    
     if locmax > maxint, maxint = locmax; end;
     if locmin < minint, minint = locmin; end;
+    
+    %[counts,binLocations]=imhist(orig,1000);
+    %binLocations(2)
+    %bin_orig=imbinarize(orig,binLocations(2));
     images(:,:,img-init+1) = orig;
-end;
-nimg = final-init+1;
-disp(sprintf('%d frame images successfully read',nimg))
-disp(sprintf('Minimum intensity value is: %f',minint))
-disp(sprintf('Maximum intensity value is: %f',maxint))
-if numsat > 0,
-    disp(sprintf('WARNING: found %d saturated pixels !',numsat))
 end;
 
 %=============================================================
 % normalize all images
 %=============================================================
 disp('normilize files to the global max and min...')
+nimg = final-init+1;
 for img=1:nimg,
     image=(images(:,:,img)-minint)./(maxint-minint);
     % drop values less than zero otherwise after filter image looks strange

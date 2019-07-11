@@ -40,7 +40,7 @@
 % update 21.12.2018
 %====================================================================== 
 
-function [peaks,SegmentedImageStack] = tracker(images,w,pth,cutoff,L)
+function [peaks,SegmentedImageStack] = tracker(images,w,AreaLevel_top,AreaLevel_bottom)
 nimg=size(images,3);
 siz=size(images(:,:,1));
 viz = 0;
@@ -61,8 +61,8 @@ for img=1:nimg,
        title('Original micrograph');
     end;
      
-    viz=0;
-    [peak,segmImg] = detect_particles(images(:,:,img),w,cutoff,pth,[viz,nfig]);
+    viz=0;FirstPeak=[];
+    [peak,segmImg,FistPeak] = detect_particles(images(:,:,img),w,[viz,nfig],AreaLevel_top,AreaLevel_bottom,FirstPeak);
     peaks = [peaks, peak];
     SegmentedImageStack(:,:,img)=segmImg;
 end;
@@ -71,19 +71,22 @@ end;
 %=============================================================
 % assemble paths across frames as linked list
 %=============================================================
-
+% L maximum displacement between frames determined by radial distribution
+% function
+disp('Maximum linking distace l from the RDF')
+L=mean(FistPeak)
 peaks = link_trajectories(peaks, L, viz, 100);
 
 % save data for later use
-save trackdata peaks;
+%save trackdata peaks;
 
 %=============================================================
 % visualize paths  
 %=============================================================
-viz=0;
-orig = images(:,:,1);
+%viz=0;
+%orig = images(:,:,1);
 %[orig] = normalize(orig);
-nframe = length(peaks);
+%nframe = length(peaks);
 
 % figure(200)
 % clf

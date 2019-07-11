@@ -36,14 +36,14 @@ function redraw_trajectories(frame,images,trajectories)
        for t=1:length(IdxCurrent)
            traj=trajectories{IdxCurrent(t)};
             traj=traj(traj(:,1)<=frame,2:3);
-            plot(traj(:,1),traj(:,2),'ro-','LineWidth',5);
+            plot(traj(:,1),traj(:,2),'r-','LineWidth',1);
        end
         
         %trajectory finished  in green
         for t=1:length(IdxFinishedBefore)
             traj=trajectories{IdxFinishedBefore(t)};
             traj=traj(traj(:,1)<=frame,2:3);
-            plot(traj(:,1),traj(:,2),'go-','LineWidth',5);
+            plot(traj(:,1),traj(:,2),'g-','LineWidth',2);
         end
       hold off;
 end

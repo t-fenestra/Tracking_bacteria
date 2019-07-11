@@ -26,9 +26,9 @@ for nline=1:length(trajectories)
     ID=nline;
     tlen=size(trajectories{nline},1);
     for iframe=1:tlen
-        fprintf(fid,'%d \t %d \t %f\t %f\t %f \t %f \t \n',ID,trajectories{nline}(iframe,:))
+        fprintf(fid,'%d \t %d \t %f\t %f\t %f \t %f \t \n',ID,trajectories{nline}(iframe,:));
     end
 end
-fclose(fid)
+fclose(fid);
 
 return

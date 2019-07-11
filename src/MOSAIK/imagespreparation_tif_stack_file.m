@@ -21,7 +21,7 @@
 %====================================================================== 
 
 
-function [images_restored,FistPeak]=imagespreparation_tif_stack_file(fname,init,final,viz,BoxFilter,GaussFilter_lambda)
+function [images_restored]=imagespreparation_tif_stack_file(fname,init,final,viz,BoxFilter,GaussFilter_lambda)
 
 %=============================================================
 % read images and determine global extrema
@@ -59,8 +59,6 @@ for img=init:final
 end;
 
 %============================================================%
-% radial distribution
-[FistPeak,Output]=radial_distribution(images(:,:,1),20.0);
 
 %=============================================================
 % normalize all images
@@ -73,7 +71,7 @@ end;
 
 
 disp(sprintf('%d images successfully normilized',nimg))
-%viz_image_stack(nimg,images)
+viz_image_stack(nimg,images)
 %viz_image_stack(nimg,images);
 %create_movie_img(images,'SM_1_03072019.avi')
 
@@ -121,7 +119,7 @@ end;
 
 
 disp(sprintf('%d images successfully restored',nimg))
-%viz_image_stack(nimg,images)
+viz_image_stack(nimg,images)
 
 
 return
