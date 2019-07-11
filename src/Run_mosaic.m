@@ -8,7 +8,11 @@ close all;
 addpath('MOSAIK')
 
 % set up experiment folder and file 
-experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_03072019_FR';
+% for MAc and Ubuntu
+% experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_03072019_FR';
+
+%for Windows
+experiment_folder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\SM_1_03072019_FR';
 fast_regime=15;
 file_name=sprintf('SM_1_03072019_FR_%dNATIVE.tif',fast_regime);
 
