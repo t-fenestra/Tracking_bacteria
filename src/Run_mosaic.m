@@ -9,9 +9,10 @@ addpath('MOSAIK')
 
 % set up experiment folder and file 
 % for MAc and Ubuntu
-experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_03072019_FR';
+%experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_03072019_FR';
+
 %for Windows
-%experiment_folder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\SM_1_03072019_FR';
+experiment_folder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\SM_1_03072019_FR';
 filePattern = fullfile(experiment_folder, '*NATIVE.tif');
 fileList = dir(filePattern);
 Nfiles=size(fileList,1);
@@ -19,9 +20,10 @@ Nfiles=size(fileList,1);
 init=1;
 final=5;
 cd ../output
-1:Nfiles
-for i=1:3
+%1:Nfiles
+for i=5
     file_name=fileList(i).name;
+    disp(file_name)
     
     Prefix_file_writing=strsplit(file_name,'.');
     Prefix_file_writing=Prefix_file_writing{1}
@@ -84,4 +86,5 @@ for i=1:3
     clear orig_images
     clear imagesFTT
     clear SegmentedImageStack
+    close all
 end

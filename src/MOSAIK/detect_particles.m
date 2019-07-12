@@ -66,9 +66,9 @@ idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
 orig_select=zeros(size(orig));
 
 npart=length(idx);
-for ii=1:npart
-    orig_select(stats(idx(ii)).PixelIdxList)=1;
-end;
+%for ii=1:npart
+%    orig_select(stats(idx(ii)).PixelIdxList)=1;
+%end;
 
 
 % %======================================================================
@@ -193,7 +193,7 @@ peak(:,4) = m2;      % second order moment
 %====================================================================== 
 % STEP 4: Visualization
 %====================================================================== 
-viz=0;
+viz=1;
 if viz == 1,
     % plot crosses at particle positions
     C = peak(:,1);
