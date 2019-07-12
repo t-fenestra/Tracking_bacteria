@@ -20,7 +20,7 @@ init=1;
 final=5;
 cd ../output
 1:Nfiles
-for i=1:3
+for i=5
     file_name=fileList(i).name;
     
     Prefix_file_writing=strsplit(file_name,'.');
@@ -84,4 +84,5 @@ for i=1:3
     clear orig_images
     clear imagesFTT
     clear SegmentedImageStack
+    
 end
