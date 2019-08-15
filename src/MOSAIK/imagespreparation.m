@@ -21,47 +21,42 @@
 %====================================================================== 
 
 
-function images_restored=imagespreparation(filestub, ext, init, final,viz,BoxFilter,GaussFilter_lambda)
+function [images_restored,images]=imagespreparation(fname,init,final,BoxFilter,GaussFilter_lambda)
 
 %=============================================================
 % read images and determine global extrema
 %=============================================================
+info = imfinfo(fname);
+num_images = numel(info);
 
-if viz ==1,
-    nfig = 1;
-else
-    nfig = -1;
-end;
-
-disp('Scanning files for minimum and maximum intensity values...')
 maxint = -Inf;
 minint = Inf;
 numsat = 0;
 
 for img=init:final
-    file = sprintf('%s%d%s',filestub,img,ext);
-    orig = double(imread(file));
+    orig = double(imread(fname, img, 'Info', info));
     locmax = max(max(orig));
     locmin = min(min(orig));
-    if locmax > 254, numsat = numsat+1; end;
+    
     if locmax > maxint, maxint = locmax; end;
     if locmin < minint, minint = locmin; end;
+    
+    %[counts,binLocations]=imhist(orig,1000);
+    %binLocations(2)
+    %bin_orig=imbinarize(orig,binLocations(2));
     images(:,:,img-init+1) = orig;
-end;
-nimg = final-init+1;
-disp(sprintf('%d frame images successfully read',nimg))
-disp(sprintf('Minimum intensity value is: %f',minint))
-disp(sprintf('Maximum intensity value is: %f',maxint))
-if numsat > 0,
-    disp(sprintf('WARNING: found %d saturated pixels !',numsat))
 end;
 
 %=============================================================
 % normalize all images
 %=============================================================
 disp('normilize files to the global max and min...')
+nimg = final-init+1;
 for img=1:nimg,
-    images(:,:,img) = (images(:,:,img)-minint)./(maxint-minint);
+    image=(images(:,:,img)-minint)./(maxint-minint);
+    % drop values less than zero otherwise after filter image looks strange
+    image(image<0)=0;
+    images(:,:,img)=image;
 end;
 
 
@@ -90,6 +85,7 @@ K = (exp(-(imjm2/(4*lambdan^2)))/B-(1/(dm^2)))/K0;
 
 
 warning('off', 'Images:initSize:adjustingMag')
+viz=0;
 
 for cimg=1:nimg,
     % apply convolution filter
@@ -105,6 +101,8 @@ for cimg=1:nimg,
      end;
     
      images_restored(:,:,cimg)=filtered_boader;
+     % cut bright artificial spot on the left
+     images_restored(1:70,1:70,cimg)=0;
 end;
 
 

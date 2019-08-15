@@ -56,9 +56,47 @@ siz = size(orig);   % image size
 %====================================================================== 
 
 % determining upper pth-th percentile of intensity values
-thresh = graythresh(orig);
+disp('determining upper pth-th percentile of intensity values');
+pth=0.10
+[cnts,bins] = imhist(orig);
+l = length(cnts);
+k = 1;
+while sum(cnts(l-k:l))/sum(cnts) < pth,
+    k = k + 1;
+end;
+%thresh= bins(l-k+1);
+
+
+
+thresh_hist = bins(l-k+1);
+% % proportion ones to zeros
+thresh_hp=length(find(orig<thresh_hist))/length(find(orig>thresh_hist))
+thresh_outsu = adaptthresh(orig); %graythresh(orig);
+thresh_op=length(find(orig<thresh_outsu))/length(find(orig>thresh_outsu))
+
+% kernel = [-1, -1, -1; -1, 8, -1; -1, -1,-1]/8;
+% diffImage = conv2(orig, kernel, 'same');
+% orig=orig+abs(diffImage);
+% cpp = median(diffImage(:))
+
+if (thresh_op>thresh_hp)
+    thresh=thresh_outsu;
+else
+    thresh=thresh_hist;
+end;
+
 orig_bw=orig>thresh;
+% ones_image=length(find(orig_bw>0));
+% zeros_image=length(find(orig_bw==0));
+% thresh_proportion=zeros_image/ones_image;
+
+% if thresh_proportion<5
+%     J=histeq(orig);
+%     imshow(J);
+% end
+
 orig_bw=bwlabel(orig_bw);
+%imshow(orig_bw);
 stats=regionprops(orig_bw,'Area','Centroid','PixelIdxList');
 Area=[stats.Area];
 Centroids = cat(1,stats.Centroid);
@@ -66,6 +104,7 @@ idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
 orig_select=zeros(size(orig));
 
 npart=length(idx);
+
 %for ii=1:npart
 %    orig_select(stats(idx(ii)).PixelIdxList)=1;
 %end;
@@ -74,17 +113,17 @@ npart=length(idx);
 % %======================================================================
 %% radial_distribution
 CentroidsNew=Centroids(idx,:);
-[CurrentFisrtPeak,Output]=radial_distribution(orig,CentroidsNew);
-CentroidsNew=int64(CentroidsNew);
-%figure,imshow(orig_select),title('Bacteria Area')
+%[CurrentFisrtPeak,Output]=radial_distribution(orig,CentroidsNew);
+%CentroidsNew=int64(CentroidsNew);
+%%figure,imshow(orig_select),title('Bacteria Area')
 
-FirstPeak=[FirstPeak,CurrentFisrtPeak];
+FirstPeak=15; %[FirstPeak,CurrentFisrtPeak];
 %====================================================================== 
 % STEP 2: Calculate zero and second order intensity moments of selected particles
 %======================================================================
 
-C=CentroidsNew(:,1);
-R=CentroidsNew(:,2);
+C=round(CentroidsNew(:,1));
+R=round(CentroidsNew(:,2));
 m0 = zeros(npart,1);
 m2 = zeros(npart,1);
 
@@ -193,7 +232,7 @@ peak(:,4) = m2;      % second order moment
 %====================================================================== 
 % STEP 4: Visualization
 %====================================================================== 
-viz=1;
+viz=0;
 if viz == 1,
     % plot crosses at particle positions
     C = peak(:,1);
