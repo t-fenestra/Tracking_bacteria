@@ -36,15 +36,15 @@ function redraw_trajectories_movie(frame,images,trajectories)
        for t=1:length(IdxCurrent)
            traj=trajectories{IdxCurrent(t)};
             traj=traj(traj(:,1)<=frame,2:3);
-            plot(traj(:,1),traj(:,2),'ro-','LineWidth',1,'MarkerFaceColor','r','MarkerSize',1);
+            plot(traj(:,1),traj(:,2),'Color','r');
        end
         
-        %trajectory finished  in green
-        for t=1:length(IdxFinishedBefore)
-            traj=trajectories{IdxFinishedBefore(t)};
-            traj=traj(traj(:,1)<=frame,2:3);
-            plot(traj(:,1),traj(:,2),'go-','LineWidth',1,'MarkerFaceColor','g','MarkerSize',1);
-        end
+       %trajectory finished  in green
+       for t=1:length(IdxFinishedBefore)
+           traj=trajectories{IdxFinishedBefore(t)};
+           traj=traj(traj(:,1)<=frame,2:3);
+           plot(traj(:,1),traj(:,2),'Color','g');
+       end
        
         set(gca, 'unit', 'normalize')
         set(gca, 'position', [0 0 1 1]);

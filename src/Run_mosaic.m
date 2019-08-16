@@ -18,10 +18,10 @@ fileList = dir(filePattern);
 Nfiles=size(fileList,1);
 
 init=1;
-final=5;
+final=20;
 cd ../output
 %1:Nfiles
-for i=1
+for i=10
     file_name=fileList(i).name;
     disp(file_name)
     
@@ -44,8 +44,8 @@ for i=1
     disp('Mosaik parameters')
     w =10          % size of circular mask to calculate moments
     trajLen=3     % minimum trajectory length in frames
-    AreaLevel_top=300 %select particals less than 200 pixel in area
-    AreaLevel_bottom=10 %select particals more than 10 pixel in area
+    AreaLevel_top=500 %select particals less than 200 pixel in area
+    AreaLevel_bottom=5 %select particals more than 10 pixel in area
     %----------------------------%
     
     %======================================================================%

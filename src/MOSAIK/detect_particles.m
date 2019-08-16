@@ -53,18 +53,20 @@ siz = size(orig);   % image size
 
 %====================================================================== 
 % STEP 1: Locating particles
-%====================================================================== 
+%======================================================================
+orig_grey=im2uint8(orig);
+[thresh,orig_bw]=maxentropie(orig_grey);
 % intermeans algorithms
-[counters,centers]=hist(orig,100);
-q=mean(orig(:));
-q_prev=0
-while abs(q-q_prev)<1e-6
-    q_foreground=mean(orig(orig(:)>q))
-    q_background=mean(orig(orig(:)<q))
-    qprev=q;
-    q=(q_foreground+q_background)/2
-end;
-thresh=q;
+% [counters,centers]=hist(orig,100);
+% q=mean(orig(:));
+% q_prev=0
+% while abs(q-q_prev)<1e-6
+%     q_foreground=mean(orig(orig(:)>q))
+%     q_background=mean(orig(orig(:)<q))
+%     qprev=q;
+%     q=(q_foreground+q_background)/2
+% end;
+% thresh=q;
 
 
 % visualise histogramme
@@ -114,7 +116,7 @@ thresh=q;
 %     J=histeq(orig);
 %     imshow(J);
 % end
-orig_bw=orig>thresh;
+%orig_bw=orig>thresh;
 orig_bw=bwlabel(orig_bw);
 imshow(orig_bw);
 stats=regionprops(orig_bw,'Area','Centroid','PixelIdxList');
@@ -124,10 +126,11 @@ idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
 orig_select=zeros(size(orig));
 
 npart=length(idx);
-
-%for ii=1:npart
-%    orig_select(stats(idx(ii)).PixelIdxList)=1;
-%end;
+% orig_select=zeros(size(orig));
+% for ii=1:npart
+%     orig_select(stats(idx(ii)).PixelIdxList)=1;
+% end;
+% figure;imshow(orig_select);
 
 
 % %======================================================================
