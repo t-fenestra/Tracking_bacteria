@@ -54,38 +54,50 @@ siz = size(orig);   % image size
 %====================================================================== 
 % STEP 1: Locating particles
 %====================================================================== 
+% visualise histogramme
+% nbins=100;
+% orig1=orig(orig<0.01);
+% [counts,centers]=hist(orig1(:),nbins);
+% bar(centers,counts);
+%Tmean=mean(orig(:))
+%Tmedian=median(orig(:))
+Tmidrange=(min(orig(:))+max(orig(:)))/2
+thresh=Tmidrange
 
 % determining upper pth-th percentile of intensity values
 disp('determining upper pth-th percentile of intensity values');
-pth=0.10
-[cnts,bins] = imhist(orig);
-l = length(cnts);
-k = 1;
-while sum(cnts(l-k:l))/sum(cnts) < pth,
-    k = k + 1;
-end;
-%thresh= bins(l-k+1);
+
+orig_bw=imbinarize(orig,thresh);
+%imshow(orig_bw);
+% pth=0.10
+% [cnts,bins] = imhist(orig);
+% l = length(cnts);
+% k = 1;
+% while sum(cnts(l-k:l))/sum(cnts) < pth,
+%     k = k + 1;
+% end;
+% %thresh= bins(l-k+1);
 
 
 
-thresh_hist = bins(l-k+1);
+%thresh_hist = bins(l-k+1);
 % % proportion ones to zeros
-thresh_hp=length(find(orig<thresh_hist))/length(find(orig>thresh_hist))
-thresh_outsu = adaptthresh(orig); %graythresh(orig);
-thresh_op=length(find(orig<thresh_outsu))/length(find(orig>thresh_outsu))
+%thresh_hp=length(find(orig<thresh_hist))/length(find(orig>thresh_hist))
+%thresh_outsu = adaptthresh(orig); %graythresh(orig);
+%thresh_op=length(find(orig<thresh_outsu))/length(find(orig>thresh_outsu))
 
 % kernel = [-1, -1, -1; -1, 8, -1; -1, -1,-1]/8;
 % diffImage = conv2(orig, kernel, 'same');
 % orig=orig+abs(diffImage);
 % cpp = median(diffImage(:))
 
-if (thresh_op>thresh_hp)
-    thresh=thresh_outsu;
-else
-    thresh=thresh_hist;
-end;
+%if (thresh_op>thresh_hp)
+%    thresh=thresh_outsu;
+%else
+%    thresh=thresh_hist;
+%end;
 
-orig_bw=orig>thresh;
+%orig_bw=orig>thresh;
 % ones_image=length(find(orig_bw>0));
 % zeros_image=length(find(orig_bw==0));
 % thresh_proportion=zeros_image/ones_image;
@@ -96,7 +108,7 @@ orig_bw=orig>thresh;
 % end
 
 orig_bw=bwlabel(orig_bw);
-%imshow(orig_bw);
+
 stats=regionprops(orig_bw,'Area','Centroid','PixelIdxList');
 Area=[stats.Area];
 Centroids = cat(1,stats.Centroid);
