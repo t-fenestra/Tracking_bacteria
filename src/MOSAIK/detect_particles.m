@@ -136,11 +136,11 @@ npart=length(idx);
 % %======================================================================
 %% radial_distribution
 CentroidsNew=Centroids(idx,:);
-%[CurrentFisrtPeak,Output]=radial_distribution(orig,CentroidsNew);
-%CentroidsNew=int64(CentroidsNew);
+[CurrentFisrtPeak,Output]=radial_distribution(orig,CentroidsNew);
+CentroidsNew=int64(CentroidsNew);
 %%figure,imshow(orig_select),title('Bacteria Area')
 
-FirstPeak=15; %[FirstPeak,CurrentFisrtPeak];
+FirstPeak=[FirstPeak,CurrentFisrtPeak];
 %====================================================================== 
 % STEP 2: Calculate zero and second order intensity moments of selected particles
 %======================================================================
@@ -149,6 +149,7 @@ C=round(CentroidsNew(:,1));
 R=round(CentroidsNew(:,2));
 m0 = zeros(npart,1);
 m2 = zeros(npart,1);
+AreaSelect=Area(idx);
 
 % % generate circular mask of radius w
 mask = zeros(dm,dm);
@@ -252,6 +253,7 @@ peak(:,1) = C;       % col position
 peak(:,2) = R;       % row position
 peak(:,3) = m0;      % zero order moment
 peak(:,4) = m2;      % second order moment
+peak(:,5)=AreaSelect;
 %====================================================================== 
 % STEP 4: Visualization
 %====================================================================== 

@@ -11,6 +11,7 @@
 %         peaks{t}(:,2)    y (row)-positions at time t
 %         peaks{t}(:,3)    zero order intensity moments
 %         peaks{t}(:,4)    second order intensity moments
+%         peaks{t}(:,5)    area size
 %         peaks{t}(:,6)    linked list index to the same
 %                          particle at time t+1
 %         trajLen          minimum trajectory length to be further
@@ -24,6 +25,7 @@
 %         take{i}[:,3] y position
 %         take{i}[:,4] moment 1
 %         take{i}[:,5] moment 2
+%         take{i}[:,6] moment segmented area size
 
 % The function returns a cell list of matrices where matrices{i}
 % is the i-th trajectory in the form of an N times 2 matrix
@@ -50,11 +52,11 @@ for ii=1:length(peaks)         % loop over all frames
 	next = peaks{iframe}(ipart,6);
 	if (next > 0)         % if particle starts a trajectory,
 	                       % follow it
-	    matrix = [iframe,peaks{iframe}(ipart,1), peaks{iframe}(ipart,2),peaks{iframe}(ipart,3),peaks{iframe}(ipart,4)];
+	    matrix = [iframe,peaks{iframe}(ipart,1), peaks{iframe}(ipart,2),peaks{iframe}(ipart,3),peaks{iframe}(ipart,4),peaks{iframe}(ipart,5)];
 	    peaks{iframe}(ipart,6) = -1;   % mark used
 	    while (next > 0)  % convert to matrix form
 		iframe = iframe + 1;
-		matrix = [matrix; iframe, peaks{iframe}(next,1), peaks{iframe}(next,2),peaks{iframe}(next,3),peaks{iframe}(next,4)];
+		matrix = [matrix; iframe, peaks{iframe}(next,1), peaks{iframe}(next,2),peaks{iframe}(next,3),peaks{iframe}(next,4),peaks{iframe}(next,5)];
 		nextold = next;
 		next = peaks{iframe}(next,6);    % mark used
 		peaks{iframe}(nextold,6) = -1;

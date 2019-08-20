@@ -21,12 +21,12 @@ function write2file_trajectory(filename,trajectories)
 % open a file for writing
 fid = fopen(filename, 'w');
 % first line
-fprintf(fid, 'ID \t Timeframe \t X \t Y\t M1\t M2\t\n');
+fprintf(fid, 'ID \t Timeframe \t X \t Y\t M1\t M2\t Area\t\n');
 for nline=1:length(trajectories)
     ID=nline;
     tlen=size(trajectories{nline},1);
     for iframe=1:tlen
-        fprintf(fid,'%d \t %d \t %f\t %f\t %f \t %f \t \n',ID,trajectories{nline}(iframe,:));
+        fprintf(fid,'%d \t %d \t %f\t %f\t %f \t %f \t %f \t\n',ID,trajectories{nline}(iframe,:));
     end
 end
 fclose(fid);
