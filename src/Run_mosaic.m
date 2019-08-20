@@ -9,19 +9,19 @@ addpath('MOSAIK')
 
 % set up experiment folder and file 
 % for MAc and Ubuntu
-experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_03072019_FR';
+%experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_03072019_FR';
 
 %for Windows
-%experiment_folder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\SM_1_03072019_FR';
+experiment_folder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\SM_1_03072019_FR';
 filePattern = fullfile(experiment_folder, '*NATIVE.tif');
 fileList = dir(filePattern);
 Nfiles=size(fileList,1);
 
 init=1;
-final=20;
+final=100;
 cd ../output
-%1:Nfiles
-for i=10
+
+for i=1:Nfiles
     file_name=fileList(i).name;
     disp(file_name)
     

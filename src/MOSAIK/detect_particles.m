@@ -118,7 +118,7 @@ orig_grey=im2uint8(orig);
 % end
 %orig_bw=orig>thresh;
 orig_bw=bwlabel(orig_bw);
-imshow(orig_bw);
+%imshow(orig_bw);
 stats=regionprops(orig_bw,'Area','Centroid','PixelIdxList');
 Area=[stats.Area];
 Centroids = cat(1,stats.Centroid);
