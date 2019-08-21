@@ -79,6 +79,10 @@ for i=10
         % save output to the data folder
         outputFileName = strcat(Prefix_file_writing,'_TRAJ.tif');
         save_tracked_images_tiff_stack(images_restored,trajectories,outputFileName);
+        
+        % save segemented to the data folder
+        outputFileName = strcat(Prefix_file_writing,'_SEG_TRAJ.tif');
+        save_tracked_images_tiff_stack(SegmentedImageStack,trajectories,outputFileName);
     end
     
     
