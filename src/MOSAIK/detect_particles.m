@@ -37,11 +37,10 @@
 %     179: 298-310.
 %====================================================================== 
 
-function [peak,segImg,FirstPeak] =  detect_particles(orig,w,v,AreaLevel_top,AreaLevel_bottom,FirstPeak)
+function [peak,segImg,FirstPeak] =  detect_particles(orig,seg,w,v,AreaLevel_top,AreaLevel_bottom,FirstPeak)
 
 viz = v(1);
 nfig = v(2);
-
 
 % % some often used quantities
 idx = [-w:1:w];     % index vector
@@ -54,83 +53,36 @@ siz = size(orig);   % image size
 %====================================================================== 
 % STEP 1: Locating particles
 %======================================================================
-orig_grey=im2uint8(orig);
-[thresh,orig_bw]=maxentropie(orig_grey);
-% intermeans algorithms
-% [counters,centers]=hist(orig,100);
-% q=mean(orig(:));
-% q_prev=0
-% while abs(q-q_prev)<1e-6
-%     q_foreground=mean(orig(orig(:)>q))
-%     q_background=mean(orig(orig(:)<q))
-%     qprev=q;
-%     q=(q_foreground+q_background)/2
-% end;
-% thresh=q;
-
-
-% visualise histogramme
-% nbins=100;
-% orig1=orig(orig<0.01);
-% [counts,centers]=hist(orig1(:),nbins);
-% bar(centers,counts);
-%Tmean=mean(orig(:))
-%Tmedian=median(orig(:))
-%Tmidrange=(min(orig(:))+max(orig(:)))/2
-%thresh=Tmidrange
-
-% % determining upper pth-th percentile of intensity values
-% disp('determining upper pth-th percentile of intensity values');
-% pth=0.10
-% [cnts,bins] = imhist(orig);
-% l = length(cnts);
-% k = 1;
-% while sum(cnts(l-k:l))/sum(cnts) < pth,
-%     k = k + 1;
-% end;
-% %thresh= bins(l-k+1);
-
-
-
-% thresh_hist = bins(l-k+1);
-% % % proportion ones to zeros
-% thresh_hp=length(find(orig<thresh_hist))/length(find(orig>thresh_hist))
-% thresh_outsu = adaptthresh(orig); %graythresh(orig);
-% thresh_op=length(find(orig<thresh_outsu))/length(find(orig>thresh_outsu))
-
-% kernel = [-1, -1, -1; -1, 8, -1; -1, -1,-1]/8;
-% diffImage = conv2(orig, kernel, 'same');
-% orig=orig+abs(diffImage);
-% cpp = median(diffImage(:))
-
-% if (thresh_op>thresh_hp)
-%     thresh=thresh_outsu;
-% else
-%     thresh=thresh_hist;
-% end;
-% ones_image=length(find(orig_bw>0));
-% zeros_image=length(find(orig_bw==0));
-% thresh_proportion=zeros_image/ones_image;
-
-% if thresh_proportion<5
-%     J=histeq(orig);
-%     imshow(J);
-% end
-%orig_bw=orig>thresh;
-orig_bw=bwlabel(orig_bw);
+orig_bw=seg;
 %imshow(orig_bw);
 stats=regionprops(orig_bw,'Area','Centroid','PixelIdxList');
 Area=[stats.Area];
 Centroids = cat(1,stats.Centroid);
+
 idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
 orig_select=zeros(size(orig));
 
 npart=length(idx);
-% orig_select=zeros(size(orig));
-% for ii=1:npart
-%     orig_select(stats(idx(ii)).PixelIdxList)=1;
+orig_select=zeros(size(orig));
+for ii=1:npart
+    orig_select(stats(idx(ii)).PixelIdxList)=1;
+end;
+
+%% Check Area of the segmented images
+% figure; imshow(seg);
+% hold on;
+% for i=1:size(Centroids,1)
+%     text(Centroids(i,1),Centroids(i,2),num2str(Area(i)),'Color','red','FontSize',14)
 % end;
-% figure;imshow(orig_select);
+% hold off;
+% 
+% 
+% figure; imshow(seg);
+% hold on;
+% for i=1:npart
+%     text(Centroids(idx(i),1),Centroids(idx(i),2),num2str(Area(idx(i))),'Color','red','FontSize',14)
+% end;
+% hold off;
 
 
 % %======================================================================
@@ -266,7 +218,7 @@ if viz == 1,
     Y = [[R'; R'], [R'-2; R'+2]];
 
     figure(nfig)
-    imshow(imbinarize(orig,thresh))
+    imshow(seg)
     hold on
     hand = line(X,Y);
     set(hand(:),'Color',[1 0 0]);
@@ -276,7 +228,7 @@ if viz == 1,
 end;
 
 peak = {peak};
-segImg=imbinarize(orig,thresh);
+segImg=seg;
 
   
 return

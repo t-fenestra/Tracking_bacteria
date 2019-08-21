@@ -13,23 +13,26 @@ experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES
 
 %for Windows
 %experiment_folder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\SM_1_03072019_FR';
-filePattern = fullfile(experiment_folder, '*NATIVE.tif');
+filePattern = fullfile(experiment_folder, '*.tifFastRSegmentation.tif');
 fileList = dir(filePattern);
+
 Nfiles=size(fileList,1);
 
 init=1;
-final=7;
+final=10;
 cd ../output/
 
 
 for i=10
-    file_name=fileList(i).name;
-    disp(file_name)
+    file_name_seg=fileList(i).name;
+    file_name=split(file_name_seg,'_t1');
+    file_name_native=strcat(file_name{1},'NATIVE.tif');
+    disp(file_name_native)
     
-    Prefix_file_writing=strsplit(file_name,'.');
+    Prefix_file_writing=strsplit(file_name_native,'.');
     Prefix_file_writing=Prefix_file_writing{1}
-    file_name=fullfile(experiment_folder,file_name);
-    
+    file_name_native=fullfile(experiment_folder,file_name_native);
+    file_name_seg=fullfile(experiment_folder,file_name_seg);
     %----------------------------%
     % writing Log File
     diary (strcat(Prefix_file_writing,'_MosaikLog.txt'))
@@ -45,7 +48,7 @@ for i=10
     disp('Mosaik parameters')
     w =10          % size of circular mask to calculate moments
     trajLen=3     % minimum trajectory length in frames
-    AreaLevel_top=500 %select particals less than 200 pixel in area
+    AreaLevel_top=1200 %select particals less than 200 pixel in area
     AreaLevel_bottom=5 %select particals more than 10 pixel in area
     %----------------------------%
     
@@ -59,14 +62,14 @@ for i=10
     NumberFiles=final-init+1;
     viz=0;
     %[imagesFTT,orig_images]=imagespreparation_FTT(file_name,init,final,viz,LowFreqBand,HighFreqBand);
-    [images_restored,orig_images]=imagespreparation(file_name,init,final,BoxFilter,GausFilter_lambda);
+    [images_restored,images_seg]=imagespreparation(file_name_native,file_name_seg,init,final,BoxFilter,GausFilter_lambda);
     %viz_image_stack(NumberFiles,orig_images)
     %viz_image_stack(NumberFiles,imagesFTT)
     
     %======================================================================%
     %% Step2: Peaks segmentation (define peaks on image)
     %  Peacks linking into trajectories across frames
-    [peaks,SegmentedImageStack]=tracker(images_restored,w,AreaLevel_top,AreaLevel_bottom);
+    [peaks,SegmentedImageStack]=tracker(images_restored,images_seg,w,AreaLevel_top,AreaLevel_bottom);
     
     % discard trajectory less than trajLen
     trajectories =ll2matrix(peaks,trajLen);
@@ -79,6 +82,10 @@ for i=10
         % save output to the data folder
         outputFileName = strcat(Prefix_file_writing,'_TRAJ.tif');
         save_tracked_images_tiff_stack(images_restored,trajectories,outputFileName);
+        
+         % save output to the data folder
+        outputFileName = strcat(Prefix_file_writing,'_Seg_TRAJ.tif');
+        save_tracked_images_tiff_stack(images_seg,trajectories,outputFileName);
     end
     
     

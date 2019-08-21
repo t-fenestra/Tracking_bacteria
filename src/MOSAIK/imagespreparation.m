@@ -21,12 +21,12 @@
 %====================================================================== 
 
 
-function [images_restored,images]=imagespreparation(fname,init,final,BoxFilter,GaussFilter_lambda)
+function [images_restored,images_seg]=imagespreparation(fname_orig,fname_seg,init,final,BoxFilter,GaussFilter_lambda)
 
 %=============================================================
 % read images and determine global extrema
 %=============================================================
-info = imfinfo(fname);
+info = imfinfo(fname_orig);
 num_images = numel(info);
 
 maxint = -Inf;
@@ -34,7 +34,7 @@ minint = Inf;
 numsat = 0;
 
 for img=init:final
-    orig = double(imread(fname, img, 'Info', info));
+    orig = double(imread(fname_orig, img, 'Info', info));
     locmax = max(max(orig));
     locmin = min(min(orig));
     
@@ -46,6 +46,19 @@ for img=init:final
     %bin_orig=imbinarize(orig,binLocations(2));
     images(:,:,img-init+1) = orig;
 end;
+
+
+thresh=20.0;
+info = imfinfo(fname_seg);
+%read segmented
+for img=init:final
+    seg = imread(fname_seg, img, 'Info', info);
+    images_seg(:,:,img-init+1) = imbinarize(seg,thresh);
+end;
+
+
+
+
 
 %=============================================================
 % normalize all images
@@ -107,6 +120,6 @@ end;
 
 
 disp(sprintf('%d images successfully restored',nimg))
-%viz_image_stack(nimg,images)
+%viz_image_stack(nimg,images_seg)
 
 return

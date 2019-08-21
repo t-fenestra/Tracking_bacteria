@@ -40,7 +40,7 @@
 % update 21.12.2018
 %====================================================================== 
 
-function [peaks,SegmentedImageStack] = tracker(images,w,AreaLevel_top,AreaLevel_bottom)
+function [peaks,SegmentedImageStack] = tracker(images,images_seg,w,AreaLevel_top,AreaLevel_bottom)
 nimg=size(images,3);
 siz=size(images(:,:,1));
 viz = 0;
@@ -62,7 +62,7 @@ for img=1:nimg,
     end;
      
     viz=0;FirstPeak=[];
-    [peak,segmImg,FistPeak] = detect_particles(images(:,:,img),w,[viz,nfig],AreaLevel_top,AreaLevel_bottom,FirstPeak);
+    [peak,segmImg,FistPeak] = detect_particles(images(:,:,img),images_seg(:,:,img),w,[viz,nfig],AreaLevel_top,AreaLevel_bottom,FirstPeak);
     peaks = [peaks, peak];
     SegmentedImageStack(:,:,img)=segmImg;
 end;
