@@ -88,10 +88,11 @@ end;
 % %======================================================================
 %% radial_distribution
 CentroidsNew=Centroids(idx,:);
-[CurrentFisrtPeak,Output]=radial_distribution(orig,CentroidsNew);
-CentroidsNew=int64(CentroidsNew);
+%[CurrentFisrtPeak,Output]=radial_distribution(orig,CentroidsNew);
+%CentroidsNew=int64(CentroidsNew);
 %%figure,imshow(orig_select),title('Bacteria Area')
 
+CurrentFisrtPeak=15;
 FirstPeak=[FirstPeak,CurrentFisrtPeak];
 %====================================================================== 
 % STEP 2: Calculate zero and second order intensity moments of selected particles
