@@ -37,8 +37,7 @@
 %     179: 298-310.
 %====================================================================== 
 
-function [peak,segImg,FirstPeak] =  detect_particles(orig,w,v,AreaLevel_top,AreaLevel_bottom,FirstPeak)
-
+function [peak,segImg] =  detect_particles(orig,w,v,AreaLevel_top,AreaLevel_bottom)
 viz = v(1);
 nfig = v(2);
 
@@ -56,70 +55,9 @@ siz = size(orig);   % image size
 %======================================================================
 orig_grey=im2uint8(orig);
 [thresh,orig_bw]=maxentropie(orig_grey);
-% intermeans algorithms
-% [counters,centers]=hist(orig,100);
-% q=mean(orig(:));
-% q_prev=0
-% while abs(q-q_prev)<1e-6
-%     q_foreground=mean(orig(orig(:)>q))
-%     q_background=mean(orig(orig(:)<q))
-%     qprev=q;
-%     q=(q_foreground+q_background)/2
-% end;
-% thresh=q;
 
-
-% visualise histogramme
-% nbins=100;
-% orig1=orig(orig<0.01);
-% [counts,centers]=hist(orig1(:),nbins);
-% bar(centers,counts);
-%Tmean=mean(orig(:))
-%Tmedian=median(orig(:))
-%Tmidrange=(min(orig(:))+max(orig(:)))/2
-%thresh=Tmidrange
-
-% % determining upper pth-th percentile of intensity values
-% disp('determining upper pth-th percentile of intensity values');
-% pth=0.10
-% [cnts,bins] = imhist(orig);
-% l = length(cnts);
-% k = 1;
-% while sum(cnts(l-k:l))/sum(cnts) < pth,
-%     k = k + 1;
-% end;
-% %thresh= bins(l-k+1);
-
-
-
-% thresh_hist = bins(l-k+1);
-% % % proportion ones to zeros
-% thresh_hp=length(find(orig<thresh_hist))/length(find(orig>thresh_hist))
-% thresh_outsu = adaptthresh(orig); %graythresh(orig);
-% thresh_op=length(find(orig<thresh_outsu))/length(find(orig>thresh_outsu))
-
-% kernel = [-1, -1, -1; -1, 8, -1; -1, -1,-1]/8;
-% diffImage = conv2(orig, kernel, 'same');
-% orig=orig+abs(diffImage);
-% cpp = median(diffImage(:))
-
-% if (thresh_op>thresh_hp)
-%     thresh=thresh_outsu;
-% else
-%     thresh=thresh_hist;
-% end;
-% ones_image=length(find(orig_bw>0));
-% zeros_image=length(find(orig_bw==0));
-% thresh_proportion=zeros_image/ones_image;
-
-% if thresh_proportion<5
-%     J=histeq(orig);
-%     imshow(J);
-% end
-%orig_bw=orig>thresh;
-orig_bw=bwlabel(orig_bw);
-%imshow(orig_bw);
-stats=regionprops(orig_bw,'Area','Centroid','PixelIdxList');
+orig_label=bwlabel(orig_bw);
+stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');
 Area=[stats.Area];
 Centroids = cat(1,stats.Centroid);
 idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
@@ -131,16 +69,8 @@ npart=length(idx);
 %     orig_select(stats(idx(ii)).PixelIdxList)=1;
 % end;
 % figure;imshow(orig_select);
-
-
-% %======================================================================
-%% radial_distribution
 CentroidsNew=Centroids(idx,:);
-[CurrentFisrtPeak,Output]=radial_distribution(orig,CentroidsNew);
-CentroidsNew=int64(CentroidsNew);
-%%figure,imshow(orig_select),title('Bacteria Area')
 
-FirstPeak=[FirstPeak,CurrentFisrtPeak];
 %====================================================================== 
 % STEP 2: Calculate zero and second order intensity moments of selected particles
 %======================================================================
@@ -276,35 +206,11 @@ if viz == 1,
 end;
 
 peak = {peak};
-segImg=imbinarize(orig,thresh);
+segImg=orig_bw;
 
   
 return
 
-% % generate circular mask of radius w
-% mask = zeros(dm,dm);
-% mask(find(imjm2 <= w*w)) = 1;
-% 
-% 
-% % identify individual particles as local maxima in a
-% % w-neighborhood that are larger than thresh
-% dil = imdilate(orig,mask);
-% [Rp,Cp] = find((dil-orig)==0);
-% particles = zeros(siz);
-% V = find(orig(sub2ind(siz,Rp,Cp))>thresh);
-% R = Rp(V); 
-% C = Cp(V);
-% particles(sub2ind(siz,R,C)) = 1;
-% npart = length(R);
-% 
-% viz=0;
-% if viz == 1,
-%     figure(nfig)
-%     nfig = nfig + 1;
-%     imshow(orig,[])
-%     hold on;
-%     plot(C,R,'r+');
-%     title('intensity maxima of particles');
-% end;
+
 
 

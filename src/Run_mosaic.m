@@ -21,8 +21,8 @@ init=1;
 final=7;
 cd ../output/
 
-
-for i=10
+%1:Nfiles
+for i=8
     file_name=fileList(i).name;
     disp(file_name)
     
@@ -41,12 +41,14 @@ for i=10
     %time frame s
     dt=0.020
     
+  
     %----------------------------%
     disp('Mosaik parameters')
     w =10          % size of circular mask to calculate moments
     trajLen=3     % minimum trajectory length in frames
-    AreaLevel_top=500 %select particals less than 200 pixel in area
-    AreaLevel_bottom=5 %select particals more than 10 pixel in area
+    AreaLevel_top=1200 %select particals less than pixel in area
+    AreaLevel_bottom=5 %select particals more than pixel in area
+    LinkingDistance=25 %Linking distance in pixel 
     %----------------------------%
     
     %======================================================================%
@@ -66,7 +68,7 @@ for i=10
     %======================================================================%
     %% Step2: Peaks segmentation (define peaks on image)
     %  Peacks linking into trajectories across frames
-    [peaks,SegmentedImageStack]=tracker(images_restored,w,AreaLevel_top,AreaLevel_bottom);
+    [peaks,SegmentedImageStack]=tracker(images_restored,w,AreaLevel_top,AreaLevel_bottom,LinkingDistance);
     
     % discard trajectory less than trajLen
     trajectories =ll2matrix(peaks,trajLen);

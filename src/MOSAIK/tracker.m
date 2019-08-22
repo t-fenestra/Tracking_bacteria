@@ -40,7 +40,7 @@
 % update 21.12.2018
 %====================================================================== 
 
-function [peaks,SegmentedImageStack] = tracker(images,w,AreaLevel_top,AreaLevel_bottom)
+function [peaks,SegmentedImageStack] = tracker(images,w,AreaLevel_top,AreaLevel_bottom,LinkedDistance)
 nimg=size(images,3);
 siz=size(images(:,:,1));
 viz = 0;
@@ -61,8 +61,8 @@ for img=1:nimg,
        title('Original micrograph');
     end;
      
-    viz=0;FirstPeak=[];
-    [peak,segmImg,FistPeak] = detect_particles(images(:,:,img),w,[viz,nfig],AreaLevel_top,AreaLevel_bottom,FirstPeak);
+    viz=0;
+    [peak,segmImg] = detect_particles(images(:,:,img),w,[viz,nfig],AreaLevel_top,AreaLevel_bottom);
     peaks = [peaks, peak];
     SegmentedImageStack(:,:,img)=segmImg;
 end;
@@ -73,8 +73,8 @@ end;
 %=============================================================
 % L maximum displacement between frames determined by radial distribution
 % function
-disp('Maximum linking distace l from the RDF')
-L=mean(FistPeak)
+disp('Linking distance')
+L=LinkedDistance
 peaks = link_trajectories(peaks, L, viz, 100);
 
 % save data for later use

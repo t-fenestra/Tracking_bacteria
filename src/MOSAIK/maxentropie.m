@@ -56,7 +56,7 @@ function [threshold I1]=maxentropie(I)
     
     % choose best threshold
     
-	h_max =hl(1)+hh(1)
+	h_max =hl(1)+hh(1);
 	threshold = 0;
     entropie(1)=h_max;
     for t=2:256
@@ -68,9 +68,10 @@ function [threshold I1]=maxentropie(I)
     end
     
     % Display    
-    I1 = zeros(size(I));
-    I1(I<threshold) = 0;
-    I1(I>threshold) = 255;
+%      I1 = zeros(size(I));
+%      I1(I<threshold) = 0;
+%      I1(I>threshold) = 255;
+    I1=I>threshold;
     %imshow(I1)      
 end 
     
