@@ -22,7 +22,7 @@ final=7;
 cd ../output/
 
 %1:Nfiles
-for i=8
+for i=15
     file_name=fileList(i).name;
     disp(file_name)
     
@@ -54,7 +54,7 @@ for i=8
     %======================================================================%
     %% Step 1: Images preparation FTT filtering
     disp('set up filter')
-    BoxFilter=20
+    BoxFilter=10
     GausFilter_lambda=3
     %LowFreqBand=10;
     %HighFreqBand=500;

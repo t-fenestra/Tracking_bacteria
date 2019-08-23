@@ -51,7 +51,7 @@ end;
 % normalize all images
 %=============================================================
 disp('normilize files to the global max and min...')
-nimg = final-init+1;
+ nimg = final-init+1;
 for img=1:nimg,
     image=(images(:,:,img)-minint)./(maxint-minint);
     % drop values less than zero otherwise after filter image looks strange
@@ -59,6 +59,11 @@ for img=1:nimg,
     images(:,:,img)=image;
 end;
 
+% tic;
+% for img=1:nimg
+%     images_restored(:,:,img)=wiener2(images(:,:,img),[10 10]);
+% end;
+% t1=toc;
 
 %====================================================================== 
 % Image restoration
@@ -107,6 +112,8 @@ end;
 
 
 disp(sprintf('%d images successfully restored',nimg))
-%viz_image_stack(nimg,images)
 
+%viz_image_stack(nimg,images)
+viz_image_stack(nimg,images_restored)
+1
 return

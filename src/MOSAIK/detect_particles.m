@@ -54,7 +54,12 @@ siz = size(orig);   % image size
 % STEP 1: Locating particles
 %======================================================================
 orig_grey=im2uint8(orig);
-[thresh,orig_bw]=maxentropie(orig_grey);
+
+orig_grey_cut=orig_grey(1000:end,:);
+
+[thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
+orig_bw=orig_grey>thresh;
+thresh
 
 orig_label=bwlabel(orig_bw);
 stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');

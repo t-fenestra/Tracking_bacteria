@@ -52,6 +52,9 @@ viz = 0;
 peaks = [];
 nfig=1;
 SegmentedImageStack=zeros(siz(1),siz(2),nimg);
+
+
+
 for img=1:nimg,
     disp(sprintf('\nParticle recoginition in image %d of %d',img,nimg))
     if viz == 1,
@@ -62,6 +65,7 @@ for img=1:nimg,
     end;
      
     viz=0;
+    
     [peak,segmImg] = detect_particles(images(:,:,img),w,[viz,nfig],AreaLevel_top,AreaLevel_bottom);
     peaks = [peaks, peak];
     SegmentedImageStack(:,:,img)=segmImg;
