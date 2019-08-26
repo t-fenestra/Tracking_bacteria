@@ -18,11 +18,13 @@ fileList = dir(filePattern);
 Nfiles=size(fileList,1);
 
 init=1;
-final=7;
+final=10;
 cd ../output/
 
 %1:Nfiles
+
 for i=15
+    tic
     file_name=fileList(i).name;
     disp(file_name)
     
@@ -46,8 +48,8 @@ for i=15
     disp('Mosaik parameters')
     w =10          % size of circular mask to calculate moments
     trajLen=3     % minimum trajectory length in frames
-    AreaLevel_top=1200 %select particals less than pixel in area
-    AreaLevel_bottom=5 %select particals more than pixel in area
+    AreaLevel_top=1000 %select particals less than pixel in area
+    AreaLevel_bottom=10 %select particals more than pixel in area
     LinkingDistance=25 %Linking distance in pixel 
     %----------------------------%
     
@@ -93,6 +95,7 @@ for i=15
     alysis_matrix = moments(trajectories,dx,dt);
     file_name=strcat(Prefix_file_writing,'Analysis.txt');
     write2file_analysis(file_name,alysis_matrix);
+    t1=toc
     diary off;
     clear orig_images
     clear imagesFTT

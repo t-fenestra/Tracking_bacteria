@@ -36,7 +36,7 @@ function redraw_trajectories_movie(frame,images,trajectories)
        for t=1:length(IdxCurrent)
            traj=trajectories{IdxCurrent(t)};
             traj=traj(traj(:,1)<=frame,2:3);
-            plot(traj(1,1),traj(1,2),'x','MarkerSize',5,'Color','r');
+            plot(traj(1,1),traj(1,2),'x','MarkerSize',3,'Color','r');
             plot(traj(:,1),traj(:,2),'Color','r');
        end
         
@@ -44,7 +44,7 @@ function redraw_trajectories_movie(frame,images,trajectories)
        for t=1:length(IdxFinishedBefore)
            traj=trajectories{IdxFinishedBefore(t)};
            traj=traj(traj(:,1)<=frame,2:3);
-           plot(traj(1,1),traj(1,2),'x','MarkerSize',5,'Color','g');
+           plot(traj(1,1),traj(1,2),'x','MarkerSize',3,'Color','g');
            plot(traj(:,1),traj(:,2),'Color','g');
        end
        

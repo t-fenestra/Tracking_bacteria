@@ -55,9 +55,43 @@ siz = size(orig);   % image size
 %======================================================================
 orig_grey=im2uint8(orig);
 
-orig_grey_cut=orig_grey(1000:end,:);
+% calculate thresh for each part of the image on the grid
+div_col=3; % size of the grid in col direction
+div_row=3; % dix of the grid in row direction
 
-[thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
+step_row=floor(siz(1)/div_col);
+step_col=floor(siz(2)/div_col);
+
+row_index=[1:step_row];
+col_index=[1:step_col];
+
+thresh_list=[];
+orig_grey_cut=orig(row_index,col_index);
+
+
+
+for i=1:div_col
+    if(i~=1) col_index=col_index+step_col;end
+    row_index=[1:step_row];
+    for j=1:div_row
+        if(j~=1) row_index=row_index+step_row;end
+        
+        %[min(row_index),max(row_index),min(col_index),max(col_index)]
+        orig_grey_cut=orig(row_index,col_index);
+        [thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
+        thresh_list=[thresh_list,thresh];
+    end;
+end;
+
+
+
+thresh=min(thresh_list);
+
+
+
+
+% orig_grey_cut=orig_grey(1000:end,:);
+% [thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
 orig_bw=orig_grey>thresh;
 thresh
 
