@@ -9,6 +9,7 @@ addpath('MOSAIK')
 
 % set up experiment folder and file 
 % for MAc and Ubuntu
+experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_03072019_FR';
 %experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_03072019_FR';
 
 %for Windows
@@ -21,6 +22,8 @@ Nfiles=size(fileList,1);
 init=1;
 final=100;
 cd ../output/
+
+%1:Nfiles
 
 
 for i=1:Nfiles
@@ -44,18 +47,22 @@ for i=1:Nfiles
     %time frame s
     dt=0.020
     
+  
     %----------------------------%
     disp('Mosaik parameters')
     w =10          % size of circular mask to calculate moments
     trajLen=3     % minimum trajectory length in frames
-    AreaLevel_top=1200 %select particals less than 200 pixel in area
-    AreaLevel_bottom=5 %select particals more than 10 pixel in area
+
+    AreaLevel_top=1000 %select particals less than pixel in area
+    AreaLevel_bottom=10 %select particals more than pixel in area
+    LinkingDistance=25 %Linking distance in pixel 
+
     %----------------------------%
     
     %======================================================================%
     %% Step 1: Images preparation FTT filtering
     disp('set up filter')
-    BoxFilter=20
+    BoxFilter=10
     GausFilter_lambda=3
     %LowFreqBand=10;
     %HighFreqBand=500;
@@ -69,7 +76,8 @@ for i=1:Nfiles
     %======================================================================%
     %% Step2: Peaks segmentation (define peaks on image)
     %  Peacks linking into trajectories across frames
-    [peaks,SegmentedImageStack]=tracker(images_restored,images_seg,w,AreaLevel_top,AreaLevel_bottom);
+    [peaks,SegmentedImageStack]=tracker(images_restored,w,AreaLevel_top,AreaLevel_bottom,LinkingDistance);
+
     
     % discard trajectory less than trajLen
     trajectories =ll2matrix(peaks,trajLen);
@@ -83,9 +91,10 @@ for i=1:Nfiles
         outputFileName = strcat(Prefix_file_writing,'_TRAJ.tif');
         save_tracked_images_tiff_stack(images_restored,trajectories,outputFileName);
         
-         % save output to the data folder
-        outputFileName = strcat(Prefix_file_writing,'_Seg_TRAJ.tif');
-        save_tracked_images_tiff_stack(images_seg,trajectories,outputFileName);
+        % save segemented to the data folder
+        outputFileName = strcat(Prefix_file_writing,'_SEG_TRAJ.tif');
+        save_tracked_images_tiff_stack(SegmentedImageStack,trajectories,outputFileName);
+
     end
     
     
@@ -94,6 +103,7 @@ for i=1:Nfiles
     alysis_matrix = moments(trajectories,dx,dt);
     file_name=strcat(Prefix_file_writing,'Analysis.txt');
     write2file_analysis(file_name,alysis_matrix);
+    t1=toc
     diary off;
     clear orig_images
     clear imagesFTT

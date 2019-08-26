@@ -37,8 +37,12 @@
 %     179: 298-310.
 %====================================================================== 
 
+<<<<<<< .merge_file_a05352
 function [peak,segImg,FirstPeak] =  detect_particles(orig,seg,w,v,AreaLevel_top,AreaLevel_bottom,FirstPeak)
 
+=======
+function [peak,segImg] =  detect_particles(orig,w,v,AreaLevel_top,AreaLevel_bottom)
+>>>>>>> .merge_file_a00804
 viz = v(1);
 nfig = v(2);
 
@@ -53,9 +57,56 @@ siz = size(orig);   % image size
 %====================================================================== 
 % STEP 1: Locating particles
 %======================================================================
+<<<<<<< .merge_file_a05352
 orig_bw=seg;
 %imshow(orig_bw);
 stats=regionprops(orig_bw,'Area','Centroid','PixelIdxList');
+=======
+orig_grey=im2uint8(orig);
+
+% calculate thresh for each part of the image on the grid
+div_col=3; % size of the grid in col direction
+div_row=3; % dix of the grid in row direction
+
+step_row=floor(siz(1)/div_col);
+step_col=floor(siz(2)/div_col);
+
+row_index=[1:step_row];
+col_index=[1:step_col];
+
+thresh_list=[];
+orig_grey_cut=orig(row_index,col_index);
+
+
+
+for i=1:div_col
+    if(i~=1) col_index=col_index+step_col;end
+    row_index=[1:step_row];
+    for j=1:div_row
+        if(j~=1) row_index=row_index+step_row;end
+        
+        %[min(row_index),max(row_index),min(col_index),max(col_index)]
+        orig_grey_cut=orig(row_index,col_index);
+        [thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
+        thresh_list=[thresh_list,thresh];
+    end;
+end;
+
+
+
+thresh=min(thresh_list);
+
+
+
+
+% orig_grey_cut=orig_grey(1000:end,:);
+% [thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
+orig_bw=orig_grey>thresh;
+thresh
+
+orig_label=bwlabel(orig_bw);
+stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');
+>>>>>>> .merge_file_a00804
 Area=[stats.Area];
 Centroids = cat(1,stats.Centroid);
 
@@ -82,6 +133,7 @@ end;
 % for i=1:npart
 %     text(Centroids(idx(i),1),Centroids(idx(i),2),num2str(Area(idx(i))),'Color','red','FontSize',14)
 % end;
+<<<<<<< .merge_file_a05352
 % hold off;
 
 
@@ -94,6 +146,11 @@ CentroidsNew=Centroids(idx,:);
 
 CurrentFisrtPeak=15;
 FirstPeak=[FirstPeak,CurrentFisrtPeak];
+=======
+% figure;imshow(orig_select);
+CentroidsNew=Centroids(idx,:);
+
+>>>>>>> .merge_file_a00804
 %====================================================================== 
 % STEP 2: Calculate zero and second order intensity moments of selected particles
 %======================================================================
@@ -229,35 +286,15 @@ if viz == 1,
 end;
 
 peak = {peak};
+<<<<<<< .merge_file_a05352
 segImg=seg;
+=======
+segImg=orig_bw;
+>>>>>>> .merge_file_a00804
 
   
 return
 
-% % generate circular mask of radius w
-% mask = zeros(dm,dm);
-% mask(find(imjm2 <= w*w)) = 1;
-% 
-% 
-% % identify individual particles as local maxima in a
-% % w-neighborhood that are larger than thresh
-% dil = imdilate(orig,mask);
-% [Rp,Cp] = find((dil-orig)==0);
-% particles = zeros(siz);
-% V = find(orig(sub2ind(siz,Rp,Cp))>thresh);
-% R = Rp(V); 
-% C = Cp(V);
-% particles(sub2ind(siz,R,C)) = 1;
-% npart = length(R);
-% 
-% viz=0;
-% if viz == 1,
-%     figure(nfig)
-%     nfig = nfig + 1;
-%     imshow(orig,[])
-%     hold on;
-%     plot(C,R,'r+');
-%     title('intensity maxima of particles');
-% end;
+
 
 

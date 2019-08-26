@@ -1,8 +1,3 @@
-orig=imagesFTT(:,:,1);
-level = graythresh(orig)
-BW = imbinarize(orig,level);
-AreaLevel_top=200
-AreaLevel_bottom=10
 
 CC=bwlabel(BW);
 stats=regionprops(CC,'Area','PixelId','MajorAxisLength','MinorAxisLength');
