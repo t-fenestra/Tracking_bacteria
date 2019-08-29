@@ -66,6 +66,7 @@ row_index=[1:step_row];
 col_index=[1:step_col];
 
 thresh_list=[];
+
 orig_grey_cut=orig(row_index,col_index);
 
 
@@ -85,14 +86,23 @@ end;
 
 
 
-thresh=min(thresh_list);
+%check threshold proportion WhitePixel
+thresh_list=unique(thresh_list);
+WhitePixel_ratio=zeros(length(thresh_list),2);
+for thr=1:length(thresh_list)
+    ProportionWhitePixel=size(find(orig_grey(:)>thresh_list(thr)),1)/siz(1)/siz(2);
+    WhitePixel_ratio(thr,1)=ProportionWhitePixel;
+    WhitePixel_ratio(thr,2)=thresh_list(thr);
+    [thresh_list(thr),ProportionWhitePixel];
+end;
 
-
-
+CheckedIndexes=find(WhitePixel_ratio(:,1)<0.01);
+thresh=min(WhitePixel_ratio(CheckedIndexes,2));
 
 % orig_grey_cut=orig_grey(1000:end,:);
 % [thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
 orig_bw=orig_grey>thresh;
+%imshow(orig_bw)
 thresh
 
 orig_label=bwlabel(orig_bw);
@@ -235,7 +245,7 @@ if viz == 1,
     Y = [[R'; R'], [R'-2; R'+2]];
 
     figure(nfig)
-    imshow(imbinarize(orig,thresh))
+    imshow(orig_bw)
     hold on
     hand = line(X,Y);
     set(hand(:),'Color',[1 0 0]);
