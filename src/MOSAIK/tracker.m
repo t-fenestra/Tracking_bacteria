@@ -79,8 +79,9 @@ end;
 % function
 disp('Linking distance')
 L=LinkedDistance
-peaks = link_trajectories(peaks, L, viz, 100);
-
+if(~isempty(peaks))
+    peaks = link_trajectories(peaks, L, viz, 100);
+end;
 % save data for later use
 %save trackdata peaks;
 

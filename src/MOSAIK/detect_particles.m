@@ -1,11 +1,11 @@
-%====================================================================== 
+%======================================================================
 %
 % DETECT_PARTICLES: detect particle-shaped features in frame images
 %
 % SYNTAX:  peak = detect_particles(orig,w,cutoff,pth,v)
 %
 % INPUTS:  orig     original image to detect features in
-%          w        global size parameter, >particle radius and 
+%          w        global size parameter, >particle radius and
 %                   <interparticle spacing
 %          cutoff   probability cutoff for non-particle discrimination
 %          pth      percentile threshold for maxima selection
@@ -28,14 +28,14 @@
 %
 % Ivo Sbalzarini, 12.2.2003
 % Institute of Computational Science, Swiss Federal
-% Institute of Technology (ETH) Zurich. 
+% Institute of Technology (ETH) Zurich.
 % E-mail: sbalzarini@inf.ethz.ch
 %
 % based on an algorithm by Crocker & Grier:
 %     Crocker, J.C. & Grier, D.G., Methods of digital video microscopy
-%     for colloidal studies, J. colloid interface sci., 1996, 
+%     for colloidal studies, J. colloid interface sci., 1996,
 %     179: 298-310.
-%====================================================================== 
+%======================================================================
 
 function [peak,segImg] =  detect_particles(orig,w,v,AreaLevel_top,AreaLevel_bottom)
 viz = v(1);
@@ -68,8 +68,6 @@ col_index=[1:step_col];
 thresh_list=[];
 orig_grey_cut=orig(row_index,col_index);
 
-
-
 for i=1:div_col
     if(i~=1) col_index=col_index+step_col;end
     row_index=[1:step_row];
@@ -83,25 +81,27 @@ for i=1:div_col
     end;
 end;
 
-
 %check threshold proportion WhitePixel
 thresh_list=unique(thresh_list);
-WhitePixel_ratio=zeros(length(thresh_list),2);
+WhitePixel_ratio=zeros(length(thresh_list),3);
 for thr=1:length(thresh_list)
-    ProportionWhitePixel=size(find(orig_grey(:)>thresh_list(thr)),1)/siz(1)/siz(2);
-    WhitePixel_ratio(thr,1)=ProportionWhitePixel;
-    WhitePixel_ratio(thr,2)=thresh_list(thr);
-    [thresh_list(thr),ProportionWhitePixel];
+    % calculate pixel ration only to the top 200 layer of image
+    %this layer is air-liquid boarder
+    WhitePixel_ratio(thr,1)=size(find(orig_grey(1:200,:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across "air" layer
+    WhitePixel_ratio(thr,2)=size(find(orig_grey(:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across all image;
+    WhitePixel_ratio(thr,3)=thresh_list(thr);
+    
 end;
+WhitePixel_ratio
+CheckedIndexes=find(WhitePixel_ratio(:,1)<0.0001);
 
-CheckedIndexes=find(WhitePixel_ratio(:,1)<0.01);
 if isempty(CheckedIndexes)
     orig_bw=zeros(siz);
     'no proper thereshold is found'
     peak = {};
     segImg=orig_bw;
 else
-    thresh=min(WhitePixel_ratio(CheckedIndexes,2));
+    thresh=min(WhitePixel_ratio(CheckedIndexes,3));
     orig_bw=orig_grey>thresh;
     thresh
     orig_label=bwlabel(orig_bw);
@@ -184,7 +184,6 @@ else
     peak = {peak};
     segImg=orig_bw;
 end
-
 
 return
 
