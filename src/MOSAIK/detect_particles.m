@@ -88,176 +88,111 @@ end;
 
 %check threshold proportion WhitePixel
 thresh_list=unique(thresh_list);
-WhitePixel_ratio=zeros(length(thresh_list),2);
+WhitePixel_ratio=zeros(length(thresh_list),3);
 for thr=1:length(thresh_list)
-    ProportionWhitePixel=size(find(orig_grey(:)>thresh_list(thr)),1)/siz(1)/siz(2);
-    WhitePixel_ratio(thr,1)=ProportionWhitePixel;
-    WhitePixel_ratio(thr,2)=thresh_list(thr);
-    [thresh_list(thr),ProportionWhitePixel];
+    % calculate pixel ration only to the top 200 layer of image
+    %this layer is air-liquid boarder
+    WhitePixel_ratio(thr,1)=size(find(orig_grey(1:200,:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across "air" layer
+    WhitePixel_ratio(thr,2)=size(find(orig_grey(:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across all image;
+    WhitePixel_ratio(thr,3)=thresh_list(thr);
+
 end;
+WhitePixel_ratio
+CheckedIndexes=find(WhitePixel_ratio(:,1)<0.0001);
 
-CheckedIndexes=find(WhitePixel_ratio(:,1)<0.01);
-thresh=min(WhitePixel_ratio(CheckedIndexes,2));
-
-% orig_grey_cut=orig_grey(1000:end,:);
-% [thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
-orig_bw=orig_grey>thresh;
-%imshow(orig_bw)
-thresh
-
-orig_label=bwlabel(orig_bw);
-stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');
-Area=[stats.Area];
-Centroids = cat(1,stats.Centroid);
-idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
-orig_select=zeros(size(orig));
-
-npart=length(idx);
-% orig_select=zeros(size(orig));
-% for ii=1:npart
-%     orig_select(stats(idx(ii)).PixelIdxList)=1;
-% end;
-% figure;imshow(orig_select);
-CentroidsNew=Centroids(idx,:);
-
-%====================================================================== 
-% STEP 2: Calculate zero and second order intensity moments of selected particles
-%======================================================================
-
-C=round(CentroidsNew(:,1));
-R=round(CentroidsNew(:,2));
-m0 = zeros(npart,1);
-m2 = zeros(npart,1);
-AreaSelect=Area(idx);
-
-% % generate circular mask of radius w
-mask = zeros(dm,dm);
-mask(find(imjm2 <= w*w)) = 1;
-
-% for each particle: compute zero and second order moments
-% lower and upper index bounds for all particle neighborhoods
-% in local coordinates. 
-li = 1-(R-w-saturate(R-w,1,siz(1)));
-lj = 1-(C-w-saturate(C-w,1,siz(2)));
-ui = dm-(R+w-saturate(R+w,1,siz(1)));
-uj = dm-(C+w-saturate(C+w,1,siz(2)));
-
-
-
-for ipart=1:npart,
-    % masked image part containing the particle
-	Aij = orig(R(ipart)+li(ipart)-w-1:R(ipart)+ui(ipart)-w-1,...
-	    C(ipart)+lj(ipart)-w-1:C(ipart)+uj(ipart)-w-1).* ...
-	    mask(li(ipart):ui(ipart),lj(ipart):uj(ipart));
-	% moments
-	m0(ipart) = sum(sum(Aij));    % eq. [6]
-	% eq. [7]
-	m2(ipart) = sum(sum(imjm2(li(ipart):ui(ipart),lj(ipart):uj(ipart))...
-	    .*Aij))/m0(ipart); 
-end;
-%
-
-% %====================================================================== 
-% % STEP 3: Non-particle discrimination
-% %====================================================================== 
-% 
-% %-------------------------------------------%
-% % check if particles have overlapped neighbourhood
-% % if yes it indicates that peacks refinment may be not valid
-% d2=w^2;
-% for i=1:length(R)
-%     for j=(i+1):length(R)
-%         dist=(R(i)-R(j))^2+(C(i)-C(j))^2;
-%         if dist<d2
-%             disp(sprintf('Warning in peaks refinement: peaks i=%d j=%d overlapped',i,j))
-%             hold on;
-%             imshow(particles)
-%             plot(R(i),C(i),'ro');
-%             plot(R(j),C(j),'go');
-%             hold off;
-%         end;
-%     end;    
-%             
-% end
-% %-------------------------------------------%
-% sigx = 0.1;
-% sigy = 0.1;
-% prob = zeros(size(m0));
-% Nm = length(m0);
-% 
-% 
-% for i=1:Nm,
-%     prob(i)=sum(exp(-((m0(i)-m0).^2./(2*sigx*sigx))-((m2(i)-m2).^2./...
-%         (2*sigy*sigy)))/(2*pi*sigx*sigy*Nm));
-% end;
-%     
-% if viz == 1,
-%     figure(nfig)
-%     clf;
-%     nfig = nfig + 1;
-%     subplot(2,2,1)
-%     hold on
-%     m0in = m0(find(prob >= cutoff));
-%     m2in = m2(find(prob >= cutoff));
-%     plot(m0in,m2in,'go')
-%     m0in = m0(find(prob < cutoff));
-%     m2in = m2(find(prob < cutoff));
-%     plot(m0in,m2in,'ro')
-%     hold off
-%     xlabel('m0')
-%     ylabel('m2')
-%     subplot(2,2,2)
-%     hist(m0,50)
-%     xlabel('m0')
-%     subplot(2,2,3)
-%     hist(m2,50)
-%     xlabel('m2')
-% end;
-% 
-% % indices of valid particles
-% tmp = find(prob>=cutoff);  
-% % pack data into return value
-% npart = length(tmp);
-% peak = zeros(npart,6);
-% peak(:,2) = R(tmp);       % row position
-% peak(:,1) = C(tmp);       % col position
-% peak(:,3) = m0(tmp);      % zero order moment
-% peak(:,4) = m2(tmp);      % second order moment
-% field 5: unused
-% field 6: used by linker to store linked list indices
+if isempty(CheckedIndexes)
+    orig_bw=zeros(siz);
+    'no proper thereshold is found'
+    peak = {};
+    segImg=orig_bw;
+else
+    thresh=min(WhitePixel_ratio(CheckedIndexes,3));
+    orig_bw=orig_grey>thresh;
+    thresh
+    orig_label=bwlabel(orig_bw);
+    stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');
+    Area=[stats.Area];
+    Centroids = cat(1,stats.Centroid);
+    idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
+    orig_select=zeros(size(orig));
+    
+    npart=length(idx);
+    % orig_select=zeros(size(orig));
+    % for ii=1:npart
+    %     orig_select(stats(idx(ii)).PixelIdxList)=1;
+    % end;
+    % figure;imshow(orig_select);
+    CentroidsNew=Centroids(idx,:);
+    
+    %======================================================================
+    % STEP 2: Calculate zero and second order intensity moments of selected particles
+    %======================================================================
+    
+    C=round(CentroidsNew(:,1));
+    R=round(CentroidsNew(:,2));
+    m0 = zeros(npart,1);
+    m2 = zeros(npart,1);
+    AreaSelect=Area(idx);
+    
+    % % generate circular mask of radius w
+    mask = zeros(dm,dm);
+    mask(find(imjm2 <= w*w)) = 1;
+    
+    % for each particle: compute zero and second order moments
+    % lower and upper index bounds for all particle neighborhoods
+    % in local coordinates.
+    li = 1-(R-w-saturate(R-w,1,siz(1)));
+    lj = 1-(C-w-saturate(C-w,1,siz(2)));
+    ui = dm-(R+w-saturate(R+w,1,siz(1)));
+    uj = dm-(C+w-saturate(C+w,1,siz(2)));
+    
+    
+    
+    for ipart=1:npart,
+        % masked image part containing the particle
+        Aij = orig(R(ipart)+li(ipart)-w-1:R(ipart)+ui(ipart)-w-1,...
+            C(ipart)+lj(ipart)-w-1:C(ipart)+uj(ipart)-w-1).* ...
+            mask(li(ipart):ui(ipart),lj(ipart):uj(ipart));
+        % moments
+        m0(ipart) = sum(sum(Aij));    % eq. [6]
+        % eq. [7]
+        m2(ipart) = sum(sum(imjm2(li(ipart):ui(ipart),lj(ipart):uj(ipart))...
+            .*Aij))/m0(ipart);
+    end;
+    peak = zeros(npart,6);
+    peak(:,1) = C;       % col position
+    peak(:,2) = R;       % row position
+    peak(:,3) = m0;      % zero order moment
+    peak(:,4) = m2;      % second order moment
+    peak(:,5)=AreaSelect;
+    %======================================================================
+    % STEP 4: Visualization
+    %======================================================================
+    viz=0;
+    if viz == 1,
+        % plot crosses at particle positions
+        C = peak(:,1);
+        R = peak(:,2);
+        X = [[C'-2; C'+2], [C'; C']];
+        Y = [[R'; R'], [R'-2; R'+2]];
+        
+        figure(nfig)
+        imshow(imbinarize(orig,thresh))
+        hold on
+        hand = line(X,Y);
+        set(hand(:),'Color',[1 0 0]);
+        set(hand(:),'LineWidth',[3.0]);
+        hold off
+        nfig = nfig + 1
+    end;
+    
+    peak = {peak};
+    segImg=orig_bw;
+end
 
 
-peak = zeros(npart,6);
-peak(:,1) = C;       % col position
-peak(:,2) = R;       % row position
-peak(:,3) = m0;      % zero order moment
-peak(:,4) = m2;      % second order moment
-peak(:,5)=AreaSelect;
-%====================================================================== 
-% STEP 4: Visualization
-%====================================================================== 
-viz=0;
-if viz == 1,
-    % plot crosses at particle positions
-    C = peak(:,1);
-    R = peak(:,2);
-    X = [[C'-2; C'+2], [C'; C']];
-    Y = [[R'; R'], [R'-2; R'+2]];
+return
 
-    figure(nfig)
-    imshow(orig_bw)
-    hold on
-    hand = line(X,Y);
-    set(hand(:),'Color',[1 0 0]);
-    set(hand(:),'LineWidth',[3.0]);
-    hold off
-    nfig = nfig + 1
-end;
-
-peak = {peak};
-segImg=orig_bw;
-
-  
 return
 
 

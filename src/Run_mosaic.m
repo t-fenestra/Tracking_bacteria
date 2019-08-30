@@ -9,7 +9,7 @@ addpath('MOSAIK')
 
 % set up experiment folder and file 
 % for MAc and Ubuntu
-experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_03072019_FR';
+experiment_folder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1/SM_1_04252019_FR';
 
 %for Windows
 %experiment_folder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\SM_1_03072019_FR';
@@ -23,7 +23,7 @@ cd ../output/
 
 %1:Nfiles
 
-for i=15
+for i=1
     tic
     file_name=fileList(i).name;
     disp(file_name)
@@ -56,14 +56,14 @@ for i=15
     %======================================================================%
     %% Step 1: Images preparation FTT filtering
     disp('set up filter')
-    BoxFilter=10
+    BoxFilter=20
     GausFilter_lambda=3
     %LowFreqBand=10;
     %HighFreqBand=500;
     NumberFiles=final-init+1;
     viz=0;
     %[imagesFTT,orig_images]=imagespreparation_FTT(file_name,init,final,viz,LowFreqBand,HighFreqBand);
-    [images_restored,orig_images]=imagespreparation(file_name,init,final,BoxFilter,GausFilter_lambda);
+    images_restored=imagespreparation(file_name,init,final,BoxFilter,GausFilter_lambda);
     %viz_image_stack(NumberFiles,orig_images)
     %viz_image_stack(NumberFiles,imagesFTT)
     
@@ -72,30 +72,36 @@ for i=15
     %  Peacks linking into trajectories across frames
     [peaks,SegmentedImageStack]=tracker(images_restored,w,AreaLevel_top,AreaLevel_bottom,LinkingDistance);
     
-    % discard trajectory less than trajLen
-    trajectories =ll2matrix(peaks,trajLen);
-    if (size(trajectories,1)>0)
-        % write to file
-        file_name=strcat(Prefix_file_writing,'Trajectories.txt');
-        write2file_trajectory(file_name,trajectories);
-        %plot_traj_in_one_plot(imagesFTT,trajectories)
+    %%% сheck if peaks empty
+    if(~isempty(peaks))
         
-        % save output to the data folder
-        outputFileName = strcat(Prefix_file_writing,'_TRAJ.tif');
-        save_tracked_images_tiff_stack(images_restored,trajectories,outputFileName);
+        % discard trajectory less than trajLen
+        trajectories =ll2matrix(peaks,trajLen);
+        if (size(trajectories,1)>0)
+            % write to file
+            file_name=strcat(Prefix_file_writing,'Trajectories.txt');
+            write2file_trajectory(file_name,trajectories);
+            %plot_traj_in_one_plot(imagesFTT,trajectories)
+            
+            % save output to the data folder
+            outputFileName = strcat(Prefix_file_writing,'_TRAJ.tif');
+            save_tracked_images_tiff_stack(images_restored,trajectories,outputFileName);
+            
+            % save segemented to the data folder
+            outputFileName = strcat(Prefix_file_writing,'_SEG_TRAJ.tif');
+            save_tracked_images_tiff_stack(SegmentedImageStack,trajectories,outputFileName);
+        end
         
-        % save segemented to the data folder
-        outputFileName = strcat(Prefix_file_writing,'_SEG_TRAJ.tif');
-        save_tracked_images_tiff_stack(SegmentedImageStack,trajectories,outputFileName);
+        
+        %% Step3: Analyze trajectories
+        %calculate diffusion coefficient and MSS
+        alysis_matrix = moments(trajectories,dx,dt);
+        file_name=strcat(Prefix_file_writing,'Analysis.txt');
+        write2file_analysis(file_name,alysis_matrix);
+        t1=toc
+    else
+        disp('programme cannot find particles across the imagestack')
     end
-    
-    
-    %% Step3: Analyze trajectories
-    %calculate diffusion coefficient and MSS
-    alysis_matrix = moments(trajectories,dx,dt);
-    file_name=strcat(Prefix_file_writing,'Analysis.txt');
-    write2file_analysis(file_name,alysis_matrix);
-    t1=toc
     diary off;
     clear orig_images
     clear imagesFTT
