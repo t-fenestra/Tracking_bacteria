@@ -9,18 +9,21 @@ addpath('MOSAIK')
 
 %% Remote folder with images
 % for Mac
-MainFolder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1';
+%MainFolder='/Volumes/mpistaff/Diaz_Pichugina_Pseudomona/Data/1-TIMELAPSES_2019_1-1';
 % for Windows
-%MainFolder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\'
+MainFolder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\'
 
 DirContent=dir(MainFolder);
 % discard hidden folder and Dicarded trajectories
 DirList=setdiff({DirContent.name},{'.','..','.DS_Store','Discarded'});
 
 %% Folder to save results
+%Mac
+%ResultFolder='/Users/pichugina/Work/Data_Analysis/MOSAIK_traking/Traking_bacteria_git/output/'
+%Windows
+ResultFolder='C:\Work\output';
 
-ResultFolder='/Users/pichugina/Work/Data_Analysis/MOSAIK_traking/Traking_bacteria_git/data/'
-mkdir(ResultFolder)
+%mkdir(ResultFolder)
 
 %% Parameters of the stack
 init=1;
@@ -29,7 +32,7 @@ final=100;
 
 %%
 % scan across experiments
-for k=1:length(DirList)
+for k=6:length(DirList)
     % Read file list in directory
     fprefix=DirList{k}
     ImageFolder=fullfile(MainFolder,fprefix);
@@ -80,11 +83,11 @@ for k=1:length(DirList)
             %======================================================================%
             %% Step 1: Images preparation FTT filtering
             disp('set up filter')
-            BoxFilter=10
+            BoxFilter=20
             GausFilter_lambda=3
             NumberFiles=final-init+1;
             viz=0;
-            [images_restored,orig_images]=imagespreparation(file_name,init,final,BoxFilter,GausFilter_lambda);
+            images_restored=imagespreparation(file_name,init,final,BoxFilter,GausFilter_lambda);
             %viz_image_stack(NumberFiles,orig_images)
             %viz_image_stack(NumberFiles,imagesFTT)
             
@@ -117,8 +120,8 @@ for k=1:length(DirList)
             file_name=strcat(Prefix_file_writing,'Analysis.txt');
             write2file_analysis(file_name,alysis_matrix);
             diary off;
-            clear orig_images
-            clear imagesFTT
+            clear images_restored
+            clear peaks
             clear SegmentedImageStack
             close all
             
