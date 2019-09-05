@@ -125,12 +125,6 @@ end;
 
 
 disp(sprintf('%d images successfully restored',nimg))
-<<<<<<< HEAD
 %viz_image_stack(nimg,images_seg)
-=======
->>>>>>> 869bf2d5ce01da20fb104be0866ceba18b0d5af0
 
-%viz_image_stack(nimg,images)
-viz_image_stack(nimg,images_restored)
-1
 return

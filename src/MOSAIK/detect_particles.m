@@ -37,12 +37,7 @@
 %     179: 298-310.
 %====================================================================== 
 
-<<<<<<< .merge_file_a05352
-function [peak,segImg,FirstPeak] =  detect_particles(orig,seg,w,v,AreaLevel_top,AreaLevel_bottom,FirstPeak)
-
-=======
 function [peak,segImg] =  detect_particles(orig,w,v,AreaLevel_top,AreaLevel_bottom)
->>>>>>> .merge_file_a00804
 viz = v(1);
 nfig = v(2);
 
@@ -57,11 +52,6 @@ siz = size(orig);   % image size
 %====================================================================== 
 % STEP 1: Locating particles
 %======================================================================
-<<<<<<< .merge_file_a05352
-orig_bw=seg;
-%imshow(orig_bw);
-stats=regionprops(orig_bw,'Area','Centroid','PixelIdxList');
-=======
 orig_grey=im2uint8(orig);
 
 % calculate thresh for each part of the image on the grid
@@ -106,7 +96,7 @@ thresh
 
 orig_label=bwlabel(orig_bw);
 stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');
->>>>>>> .merge_file_a00804
+
 Area=[stats.Area];
 Centroids = cat(1,stats.Centroid);
 
@@ -133,7 +123,6 @@ end;
 % for i=1:npart
 %     text(Centroids(idx(i),1),Centroids(idx(i),2),num2str(Area(idx(i))),'Color','red','FontSize',14)
 % end;
-<<<<<<< .merge_file_a05352
 % hold off;
 
 
@@ -143,14 +132,9 @@ CentroidsNew=Centroids(idx,:);
 %[CurrentFisrtPeak,Output]=radial_distribution(orig,CentroidsNew);
 %CentroidsNew=int64(CentroidsNew);
 %%figure,imshow(orig_select),title('Bacteria Area')
-
-CurrentFisrtPeak=15;
-FirstPeak=[FirstPeak,CurrentFisrtPeak];
-=======
 % figure;imshow(orig_select);
 CentroidsNew=Centroids(idx,:);
 
->>>>>>> .merge_file_a00804
 %====================================================================== 
 % STEP 2: Calculate zero and second order intensity moments of selected particles
 %======================================================================
@@ -286,11 +270,8 @@ if viz == 1,
 end;
 
 peak = {peak};
-<<<<<<< .merge_file_a05352
-segImg=seg;
-=======
 segImg=orig_bw;
->>>>>>> .merge_file_a00804
+
 
   
 return
