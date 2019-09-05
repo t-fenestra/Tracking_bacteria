@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.txt
+*.tif
+output/
+output_MaxEntropy/
+output_MaxEntropy_grid/
+output_Threshold_Area_threshold/

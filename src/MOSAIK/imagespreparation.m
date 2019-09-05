@@ -1,3 +1,4 @@
+
 %====================================================================== 
 %
 % IMAGES PREPARATION: normalize all images to global minimum and global
@@ -21,44 +22,29 @@
 %====================================================================== 
 
 
-function [images_restored,images_seg]=imagespreparation(fname_orig,fname_seg,init,final,BoxFilter,GaussFilter_lambda)
+function images=imagespreparation(fname,init,final,BoxFilter,GaussFilter_lambda)
 
 %=============================================================
 % read images and determine global extrema
 %=============================================================
-info = imfinfo(fname_orig);
+info = imfinfo(fname);
 num_images = numel(info);
 
 maxint = -Inf;
 minint = Inf;
 numsat = 0;
 
+images=zeros(2048,2048,final-init+1);
+
 for img=init:final
-    orig = double(imread(fname_orig, img, 'Info', info));
+    orig = double(imread(fname, img, 'Info', info));
     locmax = max(max(orig));
     locmin = min(min(orig));
     
     if locmax > maxint, maxint = locmax; end;
     if locmin < minint, minint = locmin; end;
-    
-    %[counts,binLocations]=imhist(orig,1000);
-    %binLocations(2)
-    %bin_orig=imbinarize(orig,binLocations(2));
     images(:,:,img-init+1) = orig;
 end;
-
-
-thresh=20.0;
-info = imfinfo(fname_seg);
-%read segmented
-for img=init:final
-    seg = imread(fname_seg, img, 'Info', info);
-    images_seg(:,:,img-init+1) = imbinarize(seg,thresh);
-end;
-
-
-
-
 
 %=============================================================
 % normalize all images
@@ -71,12 +57,6 @@ for img=1:nimg,
     image(image<0)=0;
     images(:,:,img)=image;
 end;
-
-% tic;
-% for img=1:nimg
-%     images_restored(:,:,img)=wiener2(images(:,:,img),[10 10]);
-% end;
-% t1=toc;
 
 %====================================================================== 
 % Image restoration
@@ -107,24 +87,18 @@ viz=0;
 
 for cimg=1:nimg,
     % apply convolution filter
-    filtered = conv2(images(:,:,cimg),K,'same');
+    filtered = imfilter(images(:,:,cimg),K,'conv','replicate');
     % Set every value that is smaller than 0 to 0 
     filtered(filtered<0)=0;
-    
-    % get rid of the kernel-boader artifacts
-    filtered_boader=zeros(siz(1),siz(2));
-    filtered_boader(w+1:end-w,w+1:end-w)=filtered(w+1:end-w,w+1:end-w);
-    if viz == 1,
-        figure(img);imshowpair(images(:,:,cimg),filtered_boader,'montage');
-     end;
-    
-     images_restored(:,:,cimg)=filtered_boader;
-     % cut bright artificial spot on the left
-     images_restored(1:70,1:70,cimg)=0;
+    images(:,:,cimg)=filtered;
+    % cut bright artificial spot on the left
+    images(1:70,1:70,cimg)=0;
 end;
 
 
 disp(sprintf('%d images successfully restored',nimg))
-%viz_image_stack(nimg,images_seg)
 
+%viz_image_stack(nimg,images)
+%viz_image_stack(nimg,images)
+%1
 return
