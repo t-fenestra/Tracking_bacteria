@@ -85,14 +85,15 @@ end;
 thresh_list=unique(thresh_list);
 WhitePixel_ratio=zeros(length(thresh_list),3);
 for thr=1:length(thresh_list)
-    % calculate pixel ration only to the top 200 layer of image
+    % calculate pixel ration only to the top  100 layer of image (200 is
+    % not enougth
     %this layer is air-liquid boarder
-    WhitePixel_ratio(thr,1)=size(find(orig_grey(1:200,:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across "air" layer
+    WhitePixel_ratio(thr,1)=size(find(orig_grey(1:50,:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across "air" layer
     WhitePixel_ratio(thr,2)=size(find(orig_grey(:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across all image;
     WhitePixel_ratio(thr,3)=thresh_list(thr);
     
 end;
-WhitePixel_ratio
+%WhitePixel_ratio
 CheckedIndexes=find(WhitePixel_ratio(:,1)<0.0001);
 
 if isempty(CheckedIndexes)
@@ -101,7 +102,7 @@ if isempty(CheckedIndexes)
     peak = {};
     segImg=orig_bw;
 else
-    thresh=min(WhitePixel_ratio(CheckedIndexes,3));
+    thresh=min(WhitePixel_ratio(CheckedIndexes,3))
     orig_bw=orig_grey>thresh;
     thresh
     orig_label=bwlabel(orig_bw);
