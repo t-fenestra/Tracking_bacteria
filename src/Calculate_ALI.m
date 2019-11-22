@@ -22,7 +22,7 @@ DirList=setdiff({DirContent.name},{'.','..','.DS_Store','Discarded',NotFolder.na
 
 %% Folder to save results
 %Mac
-ResultFolder='/Users/pichugina/Work/Data_Analysis/MOSAIK_traking/Traking_bacteria_git/output/test_2/'
+ResultFolder='/Users/pichugina/Work/Data_Analysis/MOSAIK_traking/Traking_bacteria_git/output/'
 %Windows
 %ResultFolder='C:\Work\output';
 
@@ -30,9 +30,9 @@ ResultFolder='/Users/pichugina/Work/Data_Analysis/MOSAIK_traking/Traking_bacteri
 
 %% Parameters of the stack
 init=1;
-final=5;
+final=100;
 % scan across experiments
-for k=1:length(DirList)
+for k=14 %6:length(DirList)
     % Read file list in directory
     fprefix=DirList{k}
     ImageFolder=fullfile(MainFolder,fprefix);
@@ -53,7 +53,7 @@ for k=1:length(DirList)
         
         
         % calculate till 15 hours
-        for Sregime=1:15
+        for Sregime=10
             file_name=files(Sregime);
             file_name=file_name{1};
             Prefix_file_writing=strsplit(file_name,'.');
@@ -87,55 +87,27 @@ for k=1:length(DirList)
             %% Step 1: Images preparation 
             disp('set up filter')
             images_tifthresh=read_image_stack(file_name,init,final);
+            ALI=approximate_ALI(images_tifthresh)
+            
+            outputFileName=strcat(Prefix_file_writing,'_ALI.tif');
+
+            for frame=1:size(images_tifthresh,3)
+                frame
+                figure(1); imshow(images_tifthresh(:,:,frame),[]);
+                set(gca, 'DataAspectRatioMode', 'auto')
+                hold on;
+                plot([1:2048]',ALI,'red','LineWidth',3)
+                hold off;
+                
+                F= getframe(gcf);
+                [X, Map] = frame2im(F);
+                imwrite(X, outputFileName,'WriteMode', 'append', 'Compression','none')
+            end      
             
             %viz_image_stack(NumberFiles,orig_images)
             %viz_image_stack(NumberFiles,imagesFTT)
             
-            %% Step2: Peaks segmentation (define peaks on image)
-            %  Peacks linking into trajectories across frames
-            
-            [peaks,SegmentedImageStack]=tracker(images_tifthresh,w,AreaLevel_top,AreaLevel_bottom,LinkingDistance,thresh);
-            ALI=approximate_ALI(images_tifthresh(:,:,1));
-            
-            %%% ??heck if peaks empty
-            if(~isempty(peaks))
-                
-                % discard trajectory less than trajLen
-                trajectories =ll2matrix(peaks,trajLen);
-                if (size(trajectories,1)>0)
-                    % write to file
-                    file_name=strcat(Prefix_file_writing,'Trajectories.txt');
-                    write2file_trajectory(file_name,trajectories);
-                    %plot_traj_in_one_plot(imagesFTT,trajectories)
-                    
-                    % save output to the data folder
-                    outputFileName = strcat(Prefix_file_writing,'_TRAJ.tif');
-                    save_tracked_images_tiff_stack(images_tifthresh,trajectories,outputFileName,ALI);
-                    
-                    % save segemented to the data folder
-                    outputFileName = strcat(Prefix_file_writing,'_SEG_TRAJ.tif');
-                    save_tracked_images_tiff_stack(SegmentedImageStack,trajectories,outputFileName,ALI);
-                    
-                    % save ALI coordinats
-                    outputFileName = strcat(Prefix_file_writing,'_ALI.txt');
-                    dlmwrite(outputFileName,ALI);
-                end
-                
-                
-                %% Step3: Analyze trajectories
-                %calculate diffusion coefficient and MSS
-                alysis_matrix = moments(trajectories,dx,dt);
-                file_name=strcat(Prefix_file_writing,'Analysis.txt');
-                write2file_analysis(file_name,alysis_matrix);
-                
-            else
-                disp('programme cannot find particles across the imagestack')
-            end
-            
-            diary off;
-            clear images_tifthresh
-            clear peaks
-            clear SegmentedImageStack
+           
             close all
 
         end;

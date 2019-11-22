@@ -18,7 +18,7 @@
 %====================================================================== 
 
 
-function redraw_trajectories_movie(frame,images,trajectories)
+function redraw_trajectories_movie(frame,images,trajectories,ALI)
        [StartFrame,EndFrame]=cellfun(@trajectory_start_end_frame,trajectories);
        
        % trajectories finished before frame
@@ -31,6 +31,9 @@ function redraw_trajectories_movie(frame,images,trajectories)
        figure(1); imshow(images(:,:,frame),[]);
        set(gca, 'DataAspectRatioMode', 'auto')
        hold on;
+       
+       % visualize ALI
+       %plot([1:2048]',ones(2048,1)*median(ALI),'cyan','LineWidth',2);
        
        %trajectory running in red
        for t=1:length(IdxCurrent)
@@ -48,8 +51,9 @@ function redraw_trajectories_movie(frame,images,trajectories)
            plot(traj(:,1),traj(:,2),'Color','g');
        end
        
-        set(gca, 'unit', 'normalize')
-        set(gca, 'position', [0 0 1 1]);
+       set(gca, 'unit', 'normalize')
+       set(gca, 'position', [0 0 1 1]);
+       
        
       hold off;
 end

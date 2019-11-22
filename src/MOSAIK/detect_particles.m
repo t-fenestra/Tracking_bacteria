@@ -37,7 +37,7 @@
 %     179: 298-310.
 %======================================================================
 
-function [peak,segImg] =  detect_particles(orig,w,v,AreaLevel_top,AreaLevel_bottom)
+function [peak,segImg] =  detect_particles(orig,w,v,AreaLevel_top,AreaLevel_bottom,thresh)
 viz = v(1);
 nfig = v(2);
 
@@ -53,72 +53,85 @@ siz = size(orig);   % image size
 %======================================================================
 % STEP 1: Locating particles
 %======================================================================
-orig_grey=im2uint8(orig);
+orig_bw=orig>thresh;
+orig=orig/(max(orig(:))-min(orig(:)));
 
-% calculate thresh for each part of the image on the grid
-div_col=3; % size of the grid in col direction
-div_row=3; % dix of the grid in row direction
 
-step_row=floor(siz(1)/div_col);
-step_col=floor(siz(2)/div_col);
+orig_label=bwlabel(orig_bw);
+stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');
+Area=[stats.Area];
+Centroids = cat(1,stats.Centroid);
+idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
 
-row_index=[1:step_row];
-col_index=[1:step_col];
+CentroidsNew=Centroids(idx,:);
+npart=length(idx);
 
-thresh_list=[];
-orig_grey_cut=orig(row_index,col_index);
+if npart>0
+% % calculate thresh for each part of the image on the grid
+% div_col=3; % size of the grid in col direction
+% div_row=3; % dix of the grid in row direction
+% 
+% step_row=floor(siz(1)/div_col);
+% step_col=floor(siz(2)/div_col);
+% 
+% row_index=[1:step_row];
+% col_index=[1:step_col];
+% 
+% thresh_list=[];
+% orig_grey_cut=orig(row_index,col_index);
+% 
+% for i=1:div_col
+%     if(i~=1) col_index=col_index+step_col;end
+%     row_index=[1:step_row];
+%     for j=1:div_row
+%         if(j~=1) row_index=row_index+step_row;end
+%         
+%         %[min(row_index),max(row_index),min(col_index),max(col_index)]
+%         orig_grey_cut=orig(row_index,col_index);
+%         [thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
+%         thresh_list=[thresh_list,thresh];
+%     end;
+% end;
+% 
+% %check threshold proportion WhitePixel
+% thresh_list=unique(thresh_list);
+% WhitePixel_ratio=zeros(length(thresh_list),3);
+% for thr=1:length(thresh_list)
+%     % calculate pixel ration only to the top  100 layer of image (200 is
+%     % not enougth
+%     %this layer is air-liquid boarder
+%     WhitePixel_ratio(thr,1)=size(find(orig_grey(1:50,:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across "air" layer
+%     WhitePixel_ratio(thr,2)=size(find(orig_grey(:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across all image;
+%     WhitePixel_ratio(thr,3)=thresh_list(thr);
+%     
+% end;
+% %WhitePixel_ratio
+% CheckedIndexes=find(WhitePixel_ratio(:,1)<0.0001);
+% 
+% if isempty(CheckedIndexes)
+%     orig_bw=zeros(siz);
+%     'no proper thereshold is found'
+%     peak = {};
+%     segImg=orig_bw;
+% else
+%     thresh=min(WhitePixel_ratio(CheckedIndexes,3))
+%     orig_bw=orig_grey>thresh;
+%     thresh
+%     orig_label=bwlabel(orig_bw);
+%     stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');
+%     Area=[stats.Area];
+%     Centroids = cat(1,stats.Centroid);
+%     idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
 
-for i=1:div_col
-    if(i~=1) col_index=col_index+step_col;end
-    row_index=[1:step_row];
-    for j=1:div_row
-        if(j~=1) row_index=row_index+step_row;end
-        
-        %[min(row_index),max(row_index),min(col_index),max(col_index)]
-        orig_grey_cut=orig(row_index,col_index);
-        [thresh,orig_bw_cut]=maxentropie(orig_grey_cut);
-        thresh_list=[thresh_list,thresh];
-    end;
-end;
+%     
+%     
 
-%check threshold proportion WhitePixel
-thresh_list=unique(thresh_list);
-WhitePixel_ratio=zeros(length(thresh_list),3);
-for thr=1:length(thresh_list)
-    % calculate pixel ration only to the top  100 layer of image (200 is
-    % not enougth
-    %this layer is air-liquid boarder
-    WhitePixel_ratio(thr,1)=size(find(orig_grey(1:50,:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across "air" layer
-    WhitePixel_ratio(thr,2)=size(find(orig_grey(:)>thresh_list(thr)),1)/siz(1)/siz(2); % proportion across all image;
-    WhitePixel_ratio(thr,3)=thresh_list(thr);
-    
-end;
-%WhitePixel_ratio
-CheckedIndexes=find(WhitePixel_ratio(:,1)<0.0001);
-
-if isempty(CheckedIndexes)
-    orig_bw=zeros(siz);
-    'no proper thereshold is found'
-    peak = {};
-    segImg=orig_bw;
-else
-    thresh=min(WhitePixel_ratio(CheckedIndexes,3))
-    orig_bw=orig_grey>thresh;
-    thresh
-    orig_label=bwlabel(orig_bw);
-    stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');
-    Area=[stats.Area];
-    Centroids = cat(1,stats.Centroid);
-    idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
-    orig_select=zeros(size(orig));
-    
-    npart=length(idx);
-    % orig_select=zeros(size(orig));
-    % for ii=1:npart
-    %     orig_select(stats(idx(ii)).PixelIdxList)=1;
-    % end;
-    % figure;imshow(orig_select);
-    CentroidsNew=Centroids(idx,:);
+%     % orig_select=zeros(size(orig));
+%     % for ii=1:npart
+%     %     orig_select(stats(idx(ii)).PixelIdxList)=1;
+%     % end;
+%     % figure;imshow(orig_select);
+%     CentroidsNew=Centroids(idx,:);
     
     %======================================================================
     % STEP 2: Calculate zero and second order intensity moments of selected particles
@@ -183,6 +196,10 @@ else
     end;
     
     peak = {peak};
+    segImg=orig_bw;
+else
+    disp('no particles found')
+    peak = {};
     segImg=orig_bw;
 end
 
