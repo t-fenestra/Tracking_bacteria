@@ -18,7 +18,7 @@
 %====================================================================== 
 
 
-function redraw_trajectories_movie(frame,images,trajectories,ALI)
+function redraw_trajectories_movie(frame,images,trajectories)
        [StartFrame,EndFrame]=cellfun(@trajectory_start_end_frame,trajectories);
        
        % trajectories finished before frame
@@ -33,7 +33,7 @@ function redraw_trajectories_movie(frame,images,trajectories,ALI)
        hold on;
        
        % visualize ALI
-       %plot([1:2048]',ones(2048,1)*median(ALI),'cyan','LineWidth',2);
+       %plot([1:2048]',ALI,'cyan','LineWidth',2);
        
        %trajectory running in red
        for t=1:length(IdxCurrent)

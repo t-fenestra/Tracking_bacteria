@@ -40,12 +40,11 @@
 % update 21.12.2018
 %====================================================================== 
 
-function [peaks,SegmentedImageStack] = tracker(images,w,AreaLevel_top,AreaLevel_bottom,LinkedDistance,thresh)
+function [peaks,SegmentedImageStack] = tracker(images,w,LinkedDistance)
 
 nimg=size(images,3);
 siz=size(images(:,:,1));
 viz = 0;
-
 
 %=============================================================
 % detect particles in all image frames
@@ -66,10 +65,10 @@ for img=1:nimg,
     end;
      
    viz=0;
-    
-    [peak,segmImg] = detect_particles(images(:,:,img),w,[viz,nfig],AreaLevel_top,AreaLevel_bottom,thresh);
-    peaks = [peaks, peak];
-    SegmentedImageStack(:,:,img)=segmImg;
+   
+   [peak,segmImg] = detect_particles(images(:,:,img),w,[viz,nfig]);
+   peaks = [peaks, peak];
+   SegmentedImageStack(:,:,img)=segmImg;
 end;
 
 

@@ -37,7 +37,7 @@
 %     179: 298-310.
 %======================================================================
 
-function [peak,segImg] =  detect_particles(orig,w,v,AreaLevel_top,AreaLevel_bottom,thresh)
+function [peak,segImg] =  detect_particles(orig,w,v)
 viz = v(1);
 nfig = v(2);
 
@@ -53,7 +53,10 @@ siz = size(orig);   % image size
 %======================================================================
 % STEP 1: Locating particles
 %======================================================================
-orig_bw=orig>thresh;
+%background=orig(1:50,100:2000);
+thresh=8.25;
+%thresh=graythresh(orig);%3.0; %max(background(:));
+orig_bw=imbinarize(orig,thresh);
 orig=orig/(max(orig(:))-min(orig(:)));
 
 
@@ -61,12 +64,13 @@ orig_label=bwlabel(orig_bw);
 stats=regionprops(orig_label,'Area','Centroid','PixelIdxList');
 Area=[stats.Area];
 Centroids = cat(1,stats.Centroid);
-idx=find(Area<AreaLevel_top & Area>AreaLevel_bottom);
+idx=find(Area>3);
 
-CentroidsNew=Centroids(idx,:);
-npart=length(idx);
+CentroidsNew=Centroids;
+%imshow(orig_bw)
+npart=size(Centroids,1);
 
-if npart>0
+if npart>1
 % % calculate thresh for each part of the image on the grid
 % div_col=3; % size of the grid in col direction
 % div_row=3; % dix of the grid in row direction
@@ -141,7 +145,7 @@ if npart>0
     R=round(CentroidsNew(:,2));
     m0 = zeros(npart,1);
     m2 = zeros(npart,1);
-    AreaSelect=Area(idx);
+    %AreaSelect=Area(idx);
     
     % % generate circular mask of radius w
     mask = zeros(dm,dm);
@@ -173,7 +177,7 @@ if npart>0
     peak(:,2) = R;       % row position
     peak(:,3) = m0;      % zero order moment
     peak(:,4) = m2;      % second order moment
-    peak(:,5)=AreaSelect;
+    %peak(:,5)=AreaSelect;
     %======================================================================
     % STEP 4: Visualization
     %======================================================================
@@ -186,7 +190,7 @@ if npart>0
         Y = [[R'; R'], [R'-2; R'+2]];
         
         figure(nfig)
-        imshow(imbinarize(orig,thresh))
+        imshow(orig_bw)
         hold on
         hand = line(X,Y);
         set(hand(:),'Color',[1 0 0]);

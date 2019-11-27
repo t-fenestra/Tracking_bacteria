@@ -9,7 +9,7 @@ addpath('MOSAIK')
 
 %% Remote folder with images
 % for Mac
-MainFolder='/Volumes/mpistaff/Diaz/1-datatests-1/';
+MainFolder='/Volumes/mpistaff/Diaz/1-staticmotile-1/';
 % for Windows
 %MainFolder='X:\Diaz_Pichugina_Pseudomona\Data\1-TIMELAPSES_2019_1-1\'
 
@@ -19,10 +19,10 @@ NotFolder=dir(strcat(MainFolder,'dataset*'))
 % discard hidden folder and Dicarded trajectories
 
 DirList=setdiff({DirContent.name},{'.','..','.DS_Store','Discarded',NotFolder.name});
-
+%DirList={'SM_1_04252019_FR'};
 %% Folder to save results
 %Mac
-ResultFolder='/Users/pichugina/Work/Data_Analysis/MOSAIK_traking/Traking_bacteria_git/output/test_2/'
+ResultFolder='/Users/pichugina/Work/Data_Analysis/MOSAIK_traking/Traking_bacteria_git/output/stats_motile/'
 %Windows
 %ResultFolder='C:\Work\output';
 
@@ -30,15 +30,15 @@ ResultFolder='/Users/pichugina/Work/Data_Analysis/MOSAIK_traking/Traking_bacteri
 
 %% Parameters of the stack
 init=1;
-final=5;
+final=10;
 % scan across experiments
-for k=1:length(DirList)
+for k=4:length(DirList)
     % Read file list in directory
     fprefix=DirList{k}
     ImageFolder=fullfile(MainFolder,fprefix);
     
-    %for calculation moments
-    filePattern = fullfile(ImageFolder, '*NATIVE.tifCALC.tifthresh.tif');
+    %extract all projection images
+    filePattern = fullfile(ImageFolder, '*NATIVE.tifCALC.tifCALC.tifthresh.tif_projection.tif');
     TifFiles = dir(filePattern);
     files={TifFiles.name};
     
@@ -65,7 +65,7 @@ for k=1:length(DirList)
             %----------------------------%
             % writing Log File
             diary (strcat(Prefix_file_writing,'_MosaikLog.txt'))
-             %----------------------------%
+            %----------------------------%
     
             disp('Images properties')
             %pixel size mkm
@@ -77,60 +77,19 @@ for k=1:length(DirList)
             disp('Mosaik parameters')
             w =10          % size of circular mask to calculate moments
             trajLen=3     % minimum trajectory length in frames
-            AreaLevel_top=1000 %select particals less than pixel in area
-            AreaLevel_bottom=10 %select particals more than pixel in area
+            %AreaLevel_top=1000 %select particals less than pixel in area
+            %AreaLevel_bottom=10 %select particals more than pixel in area
             LinkingDistance=15 %Linking distance in pixel
-            thresh=55 % Threshold for Andres
+           
             %----------------------------%
+            % motile part
+            Prefix_file_writing_motile=strcat(Prefix_file_writing,'_MOTILE')
+            filename=strcat(MainFolder,fprefix,'/',Prefix_file_writing,'.tifCALC.tifCALC.tifthresh.tif_MOTILE.tif');
+            pipeline_for_MOSAIK(Prefix_file_writing_motile,filename,init,final,w,trajLen,LinkingDistance)
             
-            %======================================================================%
-            %% Step 1: Images preparation 
-            disp('set up filter')
-            images_tifthresh=read_image_stack(file_name,init,final);
-            
-            %viz_image_stack(NumberFiles,orig_images)
-            %viz_image_stack(NumberFiles,imagesFTT)
-            
-            %% Step2: Peaks segmentation (define peaks on image)
-            %  Peacks linking into trajectories across frames
-            
-            [peaks,SegmentedImageStack]=tracker(images_tifthresh,w,AreaLevel_top,AreaLevel_bottom,LinkingDistance,thresh);
-            ALI=approximate_ALI(images_tifthresh(:,:,1));
-            
-            %%% ??heck if peaks empty
-            if(~isempty(peaks))
-                
-                % discard trajectory less than trajLen
-                trajectories =ll2matrix(peaks,trajLen);
-                if (size(trajectories,1)>0)
-                    % write to file
-                    file_name=strcat(Prefix_file_writing,'Trajectories.txt');
-                    write2file_trajectory(file_name,trajectories);
-                    %plot_traj_in_one_plot(imagesFTT,trajectories)
-                    
-                    % save output to the data folder
-                    outputFileName = strcat(Prefix_file_writing,'_TRAJ.tif');
-                    save_tracked_images_tiff_stack(images_tifthresh,trajectories,outputFileName,ALI);
-                    
-                    % save segemented to the data folder
-                    outputFileName = strcat(Prefix_file_writing,'_SEG_TRAJ.tif');
-                    save_tracked_images_tiff_stack(SegmentedImageStack,trajectories,outputFileName,ALI);
-                    
-                    % save ALI coordinats
-                    outputFileName = strcat(Prefix_file_writing,'_ALI.txt');
-                    dlmwrite(outputFileName,ALI);
-                end
-                
-                
-                %% Step3: Analyze trajectories
-                %calculate diffusion coefficient and MSS
-                alysis_matrix = moments(trajectories,dx,dt);
-                file_name=strcat(Prefix_file_writing,'Analysis.txt');
-                write2file_analysis(file_name,alysis_matrix);
-                
-            else
-                disp('programme cannot find particles across the imagestack')
-            end
+            Prefix_file_writing_static=strcat(Prefix_file_writing,'_STATIC')
+            filename=strcat(MainFolder,fprefix,'/',Prefix_file_writing,'.tifCALC.tifCALC.tifthresh.tif_STATIC.tif');
+            pipeline_for_MOSAIK(Prefix_file_writing_static,filename,init,final,w,trajLen,LinkingDistance)
             
             diary off;
             clear images_tifthresh
